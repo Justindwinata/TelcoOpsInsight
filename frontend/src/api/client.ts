@@ -54,6 +54,14 @@ export async function apiGet<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+export async function apiGetText(path: string): Promise<string> {
+  const response = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status}`);
+  }
+  return response.text();
+}
+
 export async function apiPost<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, { method: "POST", headers: authHeaders() });
   if (!response.ok) {

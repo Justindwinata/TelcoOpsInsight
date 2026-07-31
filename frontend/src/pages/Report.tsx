@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { apiGetText } from "../api/client";
 import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
 import { useDashboardFilters } from "../filters/FilterContext";
@@ -8,6 +10,20 @@ import { integerValue, numberValue, percentageValue } from "../utils/format";
 export function Report() {
   const { queryString } = useDashboardFilters();
   const { data, loading, error } = useApi<ExecutiveReport>(`/api/reports/executive-summary${queryString}`);
+  const [htmlStatus, setHtmlStatus] = useState<string | null>(null);
+
+  async function openHtmlReport() {
+    setHtmlStatus("Preparing HTML report...");
+    try {
+      const html = await apiGetText(`/api/reports/executive-summary.html${queryString}`);
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank", "noopener,noreferrer");
+      setHtmlStatus("HTML report opened in a new tab.");
+    } catch {
+      setHtmlStatus("Could not open the HTML report for this session.");
+    }
+  }
 
   if (loading) {
     return <LoadingState label="Loading executive report" />;
@@ -28,10 +44,11 @@ export function Report() {
             {data.company} / {data.period}
           </p>
         </div>
-        <a className="primary-button link-button" href="/api/reports/executive-summary.html" target="_blank" rel="noreferrer">
+        <button className="primary-button link-button" type="button" onClick={() => void openHtmlReport()}>
           Open HTML Report
-        </a>
+        </button>
       </section>
+      {htmlStatus ? <p className="active-filters">{htmlStatus}</p> : null}
       <section className="kpi-grid">
         <KpiCard label="Network uptime" value={percentageValue(data.overview.network_uptime)} tone="healthy" />
         <KpiCard label="SLA achievement" value={percentageValue(data.overview.sla_achievement)} />

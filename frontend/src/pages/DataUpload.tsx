@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import { apiPost, uploadCsv } from "../api/client";
+import { apiGet, apiPost, uploadCsv } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
-import type { SeedResponse, UploadValidationResponse } from "../types/dashboard";
+import type { ImportHistoryEntry, SeedResponse, UploadValidationResponse } from "../types/dashboard";
 import { integerValue } from "../utils/format";
 
 const datasetTypes = [
@@ -19,12 +19,14 @@ export function DataUpload() {
   const { hasPermission } = useAuth();
   const [seedResult, setSeedResult] = useState<SeedResponse | null>(null);
   const [uploadResult, setUploadResult] = useState<UploadValidationResponse | null>(null);
+  const [history, setHistory] = useState<ImportHistoryEntry[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [persist, setPersist] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const canSeed = hasPermission("datasets:seed");
   const canValidate = hasPermission("datasets:validate");
   const canImport = hasPermission("datasets:import");
+  const canReadHistory = hasPermission("imports:read");
 
   async function seedData() {
     setStatus("Seeding sample dataset...");
@@ -55,9 +57,25 @@ export function DataUpload() {
     }
   }
 
+  async function loadImportHistory() {
+    if (!canReadHistory) {
+      setStatus("Your role cannot read import history.");
+      return;
+    }
+    setStatus("Loading import history...");
+    try {
+      const result = await apiGet<ImportHistoryEntry[]>("/api/datasets/import-history");
+      setHistory(result.slice(0, 20));
+      setStatus("Import history loaded.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Import history request failed.");
+    }
+  }
+
   return (
-    <div className="grid two">
-      <section className="panel">
+    <div className="grid">
+      <section className="grid two">
+        <article className="panel">
         <div className="panel-heading">
           <h3>SQLite Seed</h3>
         </div>
@@ -75,9 +93,9 @@ export function DataUpload() {
             ))}
           </dl>
         ) : null}
-      </section>
+        </article>
 
-      <section className="panel">
+        <article className="panel">
         <div className="panel-heading">
           <h3>CSV Validation</h3>
         </div>
@@ -116,6 +134,48 @@ export function DataUpload() {
           </div>
         ) : null}
         {status ? <p className="muted">{status}</p> : null}
+        </article>
+      </section>
+
+      <section className="panel">
+        <div className="panel-heading">
+          <h3>Import History</h3>
+          <button className="secondary-button" type="button" onClick={() => void loadImportHistory()} disabled={!canReadHistory}>
+            Load History
+          </button>
+        </div>
+        {!canReadHistory ? <p className="permission-message">Your role cannot read import history.</p> : null}
+        <div className="table-wrap compact-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Import ID</th>
+                <th>Dataset</th>
+                <th>Status</th>
+                <th>Rows</th>
+                <th>Actor</th>
+                <th>Uploaded</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map((item) => (
+                <tr key={item.import_id}>
+                  <td>{item.import_id}</td>
+                  <td>{item.dataset_type ?? "Unknown"}</td>
+                  <td>{item.status}</td>
+                  <td>{integerValue(item.row_count)}</td>
+                  <td>{item.actor ?? "Not recorded"}</td>
+                  <td>{item.uploaded_at}</td>
+                </tr>
+              ))}
+              {history.length === 0 ? (
+                <tr>
+                  <td colSpan={6}>No import history loaded.</td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );

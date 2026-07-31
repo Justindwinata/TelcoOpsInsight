@@ -204,3 +204,16 @@ export type ExecutiveReport = {
   recommendations: Recommendation[];
   limitations: string[];
 };
+
+export type ImportHistoryEntry = {
+  import_id: string;
+  filename: string;
+  dataset_type: string | null;
+  uploaded_at: string;
+  row_count: number;
+  valid_row_count: number;
+  invalid_row_count: number;
+  status: string;
+  validation_summary: string;
+  actor: string | null;
+};
