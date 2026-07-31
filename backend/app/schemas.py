@@ -15,3 +15,4 @@ class ValidationResponse(BaseModel):
     rows: int
     errors: list[str]
     warnings: list[str]
+    imported: bool = False

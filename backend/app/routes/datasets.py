@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, Query, UploadFile
 
 from app.config import settings
 from app.schemas import SeedResponse, ValidationResponse
@@ -16,5 +16,5 @@ def seed_dataset() -> dict[str, object]:
 
 
 @router.post("/upload", response_model=ValidationResponse)
-async def upload_dataset(file: UploadFile = File(...)) -> dict[str, object]:
-    return validate_uploaded_csv(file.filename or "upload.csv", file.file)
+async def upload_dataset(file: UploadFile = File(...), persist: bool = Query(default=False)) -> dict[str, object]:
+    return validate_uploaded_csv(file.filename or "upload.csv", file.file, persist=persist)

@@ -28,6 +28,7 @@ CSV_TO_TABLE = {
     "service_quality_metrics.csv": "service_quality_metrics",
     "recommendation_rules.csv": "recommendation_rules",
 }
+DATASET_TYPE_TO_FILE = {table_name: file_name for file_name, table_name in CSV_TO_TABLE.items()}
 
 
 def table_for_file(file_name: str) -> str:
@@ -50,6 +51,15 @@ def insert_rows(connection: sqlite3.Connection, table_name: str, rows: list[dict
     column_list = ", ".join(f'"{column}"' for column in columns)
     values = [[row.get(column, "") for column in columns] for row in rows]
     connection.executemany(f'INSERT INTO "{table_name}" ({column_list}) VALUES ({placeholders})', values)
+
+
+def replace_dataset_table(connection: sqlite3.Connection, dataset_type: str, rows: list[dict[str, str]]) -> None:
+    if dataset_type not in DATASET_TYPE_TO_FILE:
+        raise ValueError(f"Unsupported dataset type: {dataset_type}")
+    columns = list(rows[0].keys()) if rows else []
+    create_table(connection, dataset_type, columns)
+    if rows:
+        insert_rows(connection, dataset_type, rows, columns)
 
 
 def seed_sample_dataset(dataset_dir: Path | None = None) -> dict[str, object]:
@@ -91,7 +101,7 @@ def build_validation_context(dataset_dir: Path | None = None) -> dict[str, set[s
     return context
 
 
-def validate_uploaded_csv(file_name: str, file_stream: BinaryIO) -> dict[str, object]:
+def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool = False) -> dict[str, object]:
     content = file_stream.read()
     if not content:
         return {
@@ -100,6 +110,7 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO) -> dict[str, ob
             "rows": 0,
             "errors": ["Uploaded file is empty"],
             "warnings": [],
+            "imported": False,
         }
 
     with tempfile.NamedTemporaryFile(prefix="telco-upload-", suffix=".csv", delete=False) as temp_file:
@@ -116,14 +127,21 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO) -> dict[str, ob
                 "rows": len(rows),
                 "errors": [f"{file_name} does not match any supported TelcoOps dataset schema"],
                 "warnings": [],
+                "imported": False,
             }
         result = validate_single_file(temp_path, build_validation_context(), expected_name=dataset_name)
+        imported = False
+        if persist and result.passed:
+            with get_connection() as connection:
+                replace_dataset_table(connection, result.dataset_type, rows)
+            imported = True
         return {
             "accepted": result.passed,
             "dataset_type": result.dataset_type,
             "rows": result.rows,
             "errors": result.errors,
             "warnings": result.warnings,
+            "imported": imported,
         }
     finally:
         temp_path.unlink(missing_ok=True)
