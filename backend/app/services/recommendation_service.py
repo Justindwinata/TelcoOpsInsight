@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from app.filters import AnalyticsFilters
 from app.services.analytics_service import as_float, overview_metrics, region_analytics, rows
 
 
@@ -24,10 +25,10 @@ def region_from_title(title: str) -> str | None:
     return title.rsplit(marker, 1)[-1]
 
 
-def rule_based_recommendations() -> dict[str, object]:
+def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[str, object]:
     rules = rows("recommendation_rules")
-    overview = overview_metrics()
-    regions = {str(row["region"]): row for row in region_analytics()["region_performance_ranking"]}
+    overview = overview_metrics(filters=filters)
+    regions = {str(row["region"]): row for row in region_analytics(filters=filters)["region_performance_ranking"]}
     recommendations: list[dict[str, object]] = []
 
     for rule in rules:

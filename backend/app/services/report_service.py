@@ -3,20 +3,22 @@ from __future__ import annotations
 from html import escape
 
 from app.config import settings
+from app.filters import AnalyticsFilters
 from app.services.analytics_service import incident_analytics, overview_metrics, region_analytics
 from app.services.recommendation_service import rule_based_recommendations
 
 
-def executive_summary() -> dict[str, object]:
-    overview = overview_metrics()
-    incidents = incident_analytics()
-    regions = region_analytics()
-    recommendations = rule_based_recommendations()
+def executive_summary(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    overview = overview_metrics(filters=filters)
+    incidents = incident_analytics(filters=filters)
+    regions = region_analytics(filters=filters)
+    recommendations = rule_based_recommendations(filters=filters)
     return {
         "title": "TelcoOps Insight Executive Summary",
         "company": settings.company_name,
         "synthetic_data_only": True,
         "period": "2026-01-01 to 2026-12-31",
+        "filter_metadata": filters.metadata() if filters else AnalyticsFilters().metadata(),
         "overview": overview,
         "top_root_causes": incidents["top_root_causes"],
         "top_regions": regions["region_performance_ranking"][:5],
@@ -30,8 +32,8 @@ def executive_summary() -> dict[str, object]:
     }
 
 
-def executive_summary_html() -> str:
-    report = executive_summary()
+def executive_summary_html(filters: AnalyticsFilters | None = None) -> str:
+    report = executive_summary(filters=filters)
     overview = report["overview"]
     recommendations = report["recommendations"]
     top_regions = report["top_regions"]

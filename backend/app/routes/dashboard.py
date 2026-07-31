@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends
 
 from app.config import settings
+from app.filters import AnalyticsFilters, build_filters
 from app.services.analytics_service import (
     incident_analytics,
     network_health,
@@ -18,68 +19,45 @@ from app.services.recommendation_service import rule_based_recommendations
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
 
 
+def with_filter_metadata(payload: dict[str, object], filters: AnalyticsFilters) -> dict[str, object]:
+    return {**payload, "filter_metadata": filters.metadata()}
+
+
 @router.get("/overview")
-def dashboard_overview(
-    region: str | None = Query(default=None),
-    service_type: str | None = Query(default=None),
-    severity: str | None = Query(default=None),
-    month: str | None = Query(default=None),
-) -> dict[str, object]:
-    return overview_metrics(region=region, service_type=service_type, severity=severity, month=month)
+def dashboard_overview(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(overview_metrics(filters=filters), filters)
 
 
 @router.get("/network-health")
-def dashboard_network_health(
-    region: str | None = Query(default=None),
-    service_type: str | None = Query(default=None),
-    month: str | None = Query(default=None),
-) -> dict[str, object]:
-    return network_health(region=region, service_type=service_type, month=month)
+def dashboard_network_health(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(network_health(filters=filters), filters)
 
 
 @router.get("/incidents")
-def dashboard_incidents(
-    region: str | None = Query(default=None),
-    service_type: str | None = Query(default=None),
-    severity: str | None = Query(default=None),
-    month: str | None = Query(default=None),
-) -> dict[str, object]:
-    return incident_analytics(region=region, service_type=service_type, severity=severity, month=month)
+def dashboard_incidents(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(incident_analytics(filters=filters), filters)
 
 
 @router.get("/tickets")
-def dashboard_tickets(
-    region: str | None = Query(default=None),
-    service_type: str | None = Query(default=None),
-    severity: str | None = Query(default=None),
-    month: str | None = Query(default=None),
-) -> dict[str, object]:
-    return ticket_analytics(region=region, service_type=service_type, severity=severity, month=month)
+def dashboard_tickets(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(ticket_analytics(filters=filters), filters)
 
 
 @router.get("/sla")
-def dashboard_sla(
-    region: str | None = Query(default=None),
-    service_type: str | None = Query(default=None),
-    month: str | None = Query(default=None),
-) -> dict[str, object]:
-    return sla_analytics(region=region, service_type=service_type, month=month)
+def dashboard_sla(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(sla_analytics(filters=filters), filters)
 
 
 @router.get("/technicians")
-def dashboard_technicians(
-    region: str | None = Query(default=None),
-    severity: str | None = Query(default=None),
-    month: str | None = Query(default=None),
-) -> dict[str, object]:
-    return technician_analytics(region=region, severity=severity, month=month)
+def dashboard_technicians(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(technician_analytics(filters=filters), filters)
 
 
 @router.get("/regions")
-def dashboard_regions(month: str | None = Query(default=None)) -> dict[str, object]:
-    return region_analytics(month=month)
+def dashboard_regions(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(region_analytics(filters=filters), filters)
 
 
 @router.get("/recommendations")
-def dashboard_recommendations() -> dict[str, object]:
-    return rule_based_recommendations()
+def dashboard_recommendations(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(rule_based_recommendations(filters=filters), filters)

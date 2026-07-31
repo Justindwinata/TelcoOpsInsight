@@ -23,6 +23,7 @@ def test_dashboard_overview_filter_endpoint() -> None:
     payload = response.json()
     assert payload["total_sites"] == 25
     assert payload["network_uptime"] > 0
+    assert payload["filter_metadata"]["applied_filters"] == {"month": "2026-03", "region": "Jakarta"}
 
 
 def test_network_health_endpoint() -> None:
@@ -93,3 +94,17 @@ def test_recommendations_endpoint() -> None:
     assert payload["method"] == "deterministic_rule_based"
     assert payload["rules_evaluated"] >= 30
     assert "recommendations" in payload
+
+
+def test_dashboard_endpoint_rejects_invalid_filter_value() -> None:
+    response = client.get("/api/dashboard/overview", params={"region": "Invalid"})
+
+    assert response.status_code == 422
+    assert "Unsupported region" in response.text
+
+
+def test_dashboard_endpoint_rejects_invalid_date_range() -> None:
+    response = client.get("/api/dashboard/incidents", params={"start_date": "2026-03-02", "end_date": "2026-03-01"})
+
+    assert response.status_code == 422
+    assert "start_date must be before" in response.text
