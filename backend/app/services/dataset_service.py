@@ -176,7 +176,7 @@ def build_validation_context(dataset_dir: Path | None = None) -> dict[str, set[s
     return context
 
 
-def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool = False) -> dict[str, object]:
+def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool = False, actor: str | None = None) -> dict[str, object]:
     content = file_stream.read()
     if not content:
         with get_connection() as connection:
@@ -188,6 +188,7 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
                 errors=["Uploaded file is empty"],
                 warnings=[],
                 status="rejected",
+                actor=actor,
             )
         return {
             "accepted": False,
@@ -217,6 +218,7 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
                     errors=errors,
                     warnings=[],
                     status="rejected",
+                    actor=actor,
                 )
             return {
                 "accepted": False,
@@ -241,6 +243,7 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
                     errors=result.errors,
                     warnings=result.warnings,
                     status="imported",
+                    actor=actor,
                 )
             imported = True
         else:
@@ -253,6 +256,7 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
                     errors=result.errors,
                     warnings=result.warnings,
                     status=status,
+                    actor=actor,
                 )
         return {
             "accepted": result.passed,

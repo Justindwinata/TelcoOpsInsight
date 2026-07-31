@@ -1,13 +1,18 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
+from tests.auth_helpers import auth_headers
 
 
 client = TestClient(app)
 
 
 def test_executive_summary_json_endpoint() -> None:
-    response = client.get("/api/reports/executive-summary", params={"region": "Jakarta"})
+    response = client.get(
+        "/api/reports/executive-summary",
+        params={"region": "Jakarta"},
+        headers=auth_headers(client, "viewer"),
+    )
 
     assert response.status_code == 200
     payload = response.json()
@@ -18,9 +23,15 @@ def test_executive_summary_json_endpoint() -> None:
 
 
 def test_executive_summary_html_endpoint() -> None:
-    response = client.get("/api/reports/executive-summary.html")
+    response = client.get("/api/reports/executive-summary.html", headers=auth_headers(client, "viewer"))
 
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
     assert "TelcoOps Insight Executive Summary" in response.text
     assert "synthetic portfolio/demo data only" in response.text
+
+
+def test_report_requires_authentication() -> None:
+    response = client.get("/api/reports/executive-summary")
+
+    assert response.status_code == 401

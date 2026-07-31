@@ -7,15 +7,18 @@ from fastapi.testclient import TestClient
 from app.database import fetch_one
 from app.main import app
 from app.services.dataset_service import load_csv, seed_sample_dataset
+from tests.auth_helpers import auth_headers
 
 
 ROOT = Path(__file__).resolve().parents[2]
+client = TestClient(app)
 
 
 def test_upload_valid_dataset_csv() -> None:
     path = ROOT / "datasets" / "sample" / "network_sites.csv"
-    response = TestClient(app).post(
+    response = client.post(
         "/api/datasets/upload",
+        headers=auth_headers(client, "analyst"),
         files={"file": ("network_sites.csv", path.read_bytes(), "text/csv")},
     )
 
@@ -29,8 +32,9 @@ def test_upload_valid_dataset_csv() -> None:
 
 
 def test_upload_invalid_dataset_csv() -> None:
-    response = TestClient(app).post(
+    response = client.post(
         "/api/datasets/upload",
+        headers=auth_headers(client, "analyst"),
         files={"file": ("bad.csv", b"wrong,column\n1,2\n", "text/csv")},
     )
 
@@ -52,9 +56,10 @@ def test_upload_valid_dataset_can_replace_table_safely() -> None:
     writer.writeheader()
     writer.writerows(rows)
 
-    response = TestClient(app).post(
+    response = client.post(
         "/api/datasets/upload",
         params={"persist": "true"},
+        headers=auth_headers(client, "noc_manager"),
         files={"file": ("network_sites.csv", buffer.getvalue().encode("utf-8"), "text/csv")},
     )
 
@@ -72,9 +77,10 @@ def test_invalid_persisted_import_does_not_replace_existing_table() -> None:
     seed_sample_dataset()
     before = fetch_one("SELECT COUNT(*) AS count FROM network_sites")
 
-    response = TestClient(app).post(
+    response = client.post(
         "/api/datasets/upload",
         params={"persist": "true"},
+        headers=auth_headers(client, "noc_manager"),
         files={"file": ("bad.csv", b"wrong,column\n1,2\n", "text/csv")},
     )
 
@@ -83,3 +89,15 @@ def test_invalid_persisted_import_does_not_replace_existing_table() -> None:
     assert response.json()["accepted"] is False
     assert response.json()["imported"] is False
     assert before == after
+
+
+def test_analyst_can_validate_but_cannot_persist_import() -> None:
+    path = ROOT / "datasets" / "sample" / "network_sites.csv"
+    response = client.post(
+        "/api/datasets/upload",
+        params={"persist": "true"},
+        headers=auth_headers(client, "analyst"),
+        files={"file": ("network_sites.csv", path.read_bytes(), "text/csv")},
+    )
+
+    assert response.status_code == 403

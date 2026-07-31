@@ -118,3 +118,16 @@ def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(
     if username is None or username not in DEMO_USERS:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     return DEMO_USERS[username]
+
+
+def ensure_permission(user: DemoUser, permission: str) -> None:
+    if permission not in user.permissions:
+        raise HTTPException(status_code=403, detail=f"Permission denied: {permission}")
+
+
+def require_permission(permission: str):
+    def dependency(user: DemoUser = Depends(get_current_user)) -> DemoUser:
+        ensure_permission(user, permission)
+        return user
+
+    return dependency
