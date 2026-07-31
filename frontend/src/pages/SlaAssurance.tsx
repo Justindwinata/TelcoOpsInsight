@@ -1,12 +1,14 @@
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { SlaResponse } from "../types/dashboard";
 import { integerValue, numberValue } from "../utils/format";
 
 export function SlaAssurance() {
-  const { data, loading, error } = useApi<SlaResponse>("/api/dashboard/sla");
+  const { queryString } = useDashboardFilters();
+  const { data, loading, error } = useApi<SlaResponse>(`/api/dashboard/sla${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading SLA assurance" />;

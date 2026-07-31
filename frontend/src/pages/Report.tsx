@@ -1,11 +1,13 @@
 import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { ExecutiveReport } from "../types/dashboard";
 import { integerValue, numberValue, percentageValue } from "../utils/format";
 
 export function Report() {
-  const { data, loading, error } = useApi<ExecutiveReport>("/api/reports/executive-summary");
+  const { queryString } = useDashboardFilters();
+  const { data, loading, error } = useApi<ExecutiveReport>(`/api/reports/executive-summary${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading executive report" />;

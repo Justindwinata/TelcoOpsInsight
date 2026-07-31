@@ -1,12 +1,14 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { TechniciansResponse } from "../types/dashboard";
 import { numberValue, percentageValue } from "../utils/format";
 
 export function FieldTechnicians() {
-  const { data, loading, error } = useApi<TechniciansResponse>("/api/dashboard/technicians");
+  const { queryString } = useDashboardFilters();
+  const { data, loading, error } = useApi<TechniciansResponse>(`/api/dashboard/technicians${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading field operations" />;

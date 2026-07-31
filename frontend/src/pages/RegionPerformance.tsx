@@ -1,11 +1,13 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { RegionsResponse } from "../types/dashboard";
 import { integerValue, numberValue } from "../utils/format";
 
 export function RegionPerformance() {
-  const { data, loading, error } = useApi<RegionsResponse>("/api/dashboard/regions");
+  const { queryString } = useDashboardFilters();
+  const { data, loading, error } = useApi<RegionsResponse>(`/api/dashboard/regions${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading regional performance" />;

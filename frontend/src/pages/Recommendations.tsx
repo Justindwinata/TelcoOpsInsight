@@ -1,10 +1,12 @@
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { RecommendationsResponse } from "../types/dashboard";
 import { integerValue, numberValue } from "../utils/format";
 
 export function Recommendations() {
-  const { data, loading, error } = useApi<RecommendationsResponse>("/api/dashboard/recommendations");
+  const { queryString } = useDashboardFilters();
+  const { data, loading, error } = useApi<RecommendationsResponse>(`/api/dashboard/recommendations${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading recommendations" />;

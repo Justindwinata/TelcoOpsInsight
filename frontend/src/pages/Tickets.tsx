@@ -1,12 +1,14 @@
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { TicketsResponse } from "../types/dashboard";
 import { integerValue, numberValue, percentageValue } from "../utils/format";
 
 export function Tickets() {
-  const { data, loading, error } = useApi<TicketsResponse>("/api/dashboard/tickets");
+  const { queryString } = useDashboardFilters();
+  const { data, loading, error } = useApi<TicketsResponse>(`/api/dashboard/tickets${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading customer tickets" />;

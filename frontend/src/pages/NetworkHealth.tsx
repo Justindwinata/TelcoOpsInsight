@@ -1,10 +1,12 @@
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { NetworkHealthResponse } from "../types/dashboard";
 
 export function NetworkHealth() {
-  const { data, loading, error } = useApi<NetworkHealthResponse>("/api/dashboard/network-health");
+  const { queryString } = useDashboardFilters();
+  const { data, loading, error } = useApi<NetworkHealthResponse>(`/api/dashboard/network-health${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading network health" />;

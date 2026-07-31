@@ -1,11 +1,13 @@
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { IncidentsResponse } from "../types/dashboard";
 import { integerValue } from "../utils/format";
 
 export function Incidents() {
-  const { data, loading, error } = useApi<IncidentsResponse>("/api/dashboard/incidents");
+  const { queryString } = useDashboardFilters();
+  const { data, loading, error } = useApi<IncidentsResponse>(`/api/dashboard/incidents${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading incidents" />;

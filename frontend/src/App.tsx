@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { FilterPanel } from "./components/FilterPanel";
+import { FilterProvider } from "./filters/FilterContext";
 import { DataUpload } from "./pages/DataUpload";
 import { ExecutiveOverview } from "./pages/ExecutiveOverview";
 import { FieldTechnicians } from "./pages/FieldTechnicians";
@@ -96,6 +98,7 @@ function AppContent() {
             </button>
           </div>
         </header>
+        <FilterPanel />
         {renderSection(activeSection)}
       </main>
     </div>
@@ -105,7 +108,9 @@ function AppContent() {
 export function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <FilterProvider>
+        <AppContent />
+      </FilterProvider>
     </AuthProvider>
   );
 }

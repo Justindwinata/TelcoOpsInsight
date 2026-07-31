@@ -1,14 +1,16 @@
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
+import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
 import type { NetworkHealthResponse, OverviewMetrics, RecommendationsResponse } from "../types/dashboard";
 import { integerValue, numberValue, percentageValue } from "../utils/format";
 
 export function ExecutiveOverview() {
-  const overview = useApi<OverviewMetrics>("/api/dashboard/overview");
-  const network = useApi<NetworkHealthResponse>("/api/dashboard/network-health");
-  const recommendations = useApi<RecommendationsResponse>("/api/dashboard/recommendations");
+  const { queryString } = useDashboardFilters();
+  const overview = useApi<OverviewMetrics>(`/api/dashboard/overview${queryString}`);
+  const network = useApi<NetworkHealthResponse>(`/api/dashboard/network-health${queryString}`);
+  const recommendations = useApi<RecommendationsResponse>(`/api/dashboard/recommendations${queryString}`);
 
   if (overview.loading || network.loading || recommendations.loading) {
     return <LoadingState label="Loading operational overview" />;
