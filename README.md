@@ -50,6 +50,47 @@ npm install
 npm run dev
 ```
 
+The frontend will run at `http://127.0.0.1:5173` and proxy API calls to the backend at `http://127.0.0.1:8000`.
+
+## API And Dashboard
+
+Core backend endpoints:
+
+- `GET /health`
+- `POST /api/datasets/seed`
+- `POST /api/datasets/upload`
+- `GET /api/dashboard/overview`
+- `GET /api/dashboard/network-health`
+- `GET /api/dashboard/incidents`
+- `GET /api/dashboard/tickets`
+- `GET /api/dashboard/sla`
+- `GET /api/dashboard/technicians`
+- `GET /api/dashboard/regions`
+- `GET /api/dashboard/recommendations`
+- `GET /api/reports/executive-summary`
+- `GET /api/reports/executive-summary.html`
+
+Frontend sections:
+
+- Executive Overview
+- Network Health
+- Incident Monitoring
+- SLA Assurance
+- Customer Tickets
+- Field Technician Dispatch
+- Region Performance
+- Recommendations
+- Data Upload
+- Report
+
+## Validation
+
+```bash
+python3 scripts/validate_telco_dataset.py
+cd backend && pytest -q
+cd ../frontend && npm run build && npm test
+```
+
 ## Product Truth
 
 Allowed positioning: synthetic telecom operations dataset, network operations dashboard, service assurance dashboard, local SQLite persistence, CSV upload validation, rule-based recommendations, and decision-support prototype.
