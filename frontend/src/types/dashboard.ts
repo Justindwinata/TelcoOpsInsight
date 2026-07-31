@@ -31,8 +31,14 @@ export type Recommendation = {
   condition: string;
   threshold: number;
   observed_value: number;
+  supporting_metric_value: number;
+  trigger_condition: string;
+  affected_region: string;
+  affected_service: string;
   recommendation_title: string;
   recommendation_text: string;
+  explanation: string;
+  recommended_action: string;
   recommended_owner: string;
   region: string;
 };

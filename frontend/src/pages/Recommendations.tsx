@@ -35,23 +35,23 @@ export function Recommendations() {
                 <span className="muted">{item.region}</span>
               </div>
               <strong>{item.recommendation_title}</strong>
-              <p>{item.recommendation_text}</p>
+              <p>{item.explanation}</p>
+              <p>{item.recommended_action}</p>
               <dl className="inline-metrics">
                 <div>
                   <dt>Observed</dt>
-                  <dd>{numberValue(item.observed_value, 2)}</dd>
+                  <dd>{numberValue(item.supporting_metric_value, 2)}</dd>
                 </div>
                 <div>
                   <dt>Rule</dt>
-                  <dd>
-                    {item.condition} {numberValue(item.threshold, 2)}
-                  </dd>
+                  <dd>{item.trigger_condition}</dd>
                 </div>
                 <div>
-                  <dt>Owner</dt>
-                  <dd>{item.recommended_owner}</dd>
+                  <dt>Service</dt>
+                  <dd>{item.affected_service}</dd>
                 </div>
               </dl>
+              <p className="muted">Owner: {item.recommended_owner}</p>
             </article>
           ))}
         </div>

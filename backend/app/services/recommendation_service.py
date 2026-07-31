@@ -30,6 +30,7 @@ def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[
     overview = overview_metrics(filters=filters)
     regions = {str(row["region"]): row for row in region_analytics(filters=filters)["region_performance_ranking"]}
     recommendations: list[dict[str, object]] = []
+    seen: set[tuple[str, str, str]] = set()
 
     for rule in rules:
         metric = str(rule.get("metric", ""))
@@ -40,6 +41,12 @@ def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[
         source = regions.get(target_region, {}) if target_region else overview
         observed = as_float(source.get(metric))
         if compare(observed, condition, threshold):
+            affected_region = target_region or filters.region if filters and filters.region else target_region or "All Regions"
+            affected_service = filters.service_type if filters and filters.service_type else "All Services"
+            dedupe_key = (metric, str(affected_region), str(rule.get("recommendation_title", "")))
+            if dedupe_key in seen:
+                continue
+            seen.add(dedupe_key)
             recommendations.append(
                 {
                     "rule_id": rule["rule_id"],
@@ -48,10 +55,16 @@ def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[
                     "condition": condition,
                     "threshold": threshold,
                     "observed_value": observed,
+                    "supporting_metric_value": observed,
+                    "trigger_condition": f"{metric} {condition} {threshold}",
+                    "affected_region": affected_region,
+                    "affected_service": affected_service,
                     "recommendation_title": title,
                     "recommendation_text": rule["recommendation_text"],
+                    "explanation": f"Observed {metric} is {round(observed, 3)}, which triggered rule {condition} {threshold}.",
+                    "recommended_action": rule["recommendation_text"],
                     "recommended_owner": rule["recommended_owner"],
-                    "region": target_region or "All Regions",
+                    "region": affected_region,
                 }
             )
 
