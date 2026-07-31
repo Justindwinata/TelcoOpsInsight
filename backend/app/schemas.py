@@ -30,3 +30,21 @@ class ImportHistoryEntry(BaseModel):
     status: str
     validation_summary: str
     actor: str | None = None
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class UserProfile(BaseModel):
+    username: str
+    display_name: str
+    role: str
+    permissions: list[str]
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserProfile
