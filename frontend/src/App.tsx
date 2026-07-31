@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { DataUpload } from "./pages/DataUpload";
 import { ExecutiveOverview } from "./pages/ExecutiveOverview";
 import { FieldTechnicians } from "./pages/FieldTechnicians";
@@ -9,6 +10,7 @@ import { RegionPerformance } from "./pages/RegionPerformance";
 import { Report } from "./pages/Report";
 import { SlaAssurance } from "./pages/SlaAssurance";
 import { Tickets } from "./pages/Tickets";
+import { Login } from "./pages/Login";
 
 const sections = [
   "Executive Overview",
@@ -50,8 +52,13 @@ function renderSection(section: Section) {
   }
 }
 
-export function App() {
+function AppContent() {
   const [activeSection, setActiveSection] = useState<Section>("Executive Overview");
+  const { user, logout } = useAuth();
+
+  if (!user) {
+    return <Login />;
+  }
 
   return (
     <div className="app-shell">
@@ -81,9 +88,24 @@ export function App() {
             <h2>{activeSection}</h2>
           </div>
           <span className="data-pill">Synthetic 2026 Dataset</span>
+          <div className="user-chip">
+            <span>{user.display_name}</span>
+            <strong>{user.role}</strong>
+            <button type="button" onClick={() => void logout()}>
+              Logout
+            </button>
+          </div>
         </header>
         {renderSection(activeSection)}
       </main>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

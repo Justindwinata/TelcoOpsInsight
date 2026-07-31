@@ -144,6 +144,8 @@ export type UploadValidationResponse = {
   rows: number;
   errors: string[];
   warnings: string[];
+  imported: boolean;
+  import_id: string | null;
 };
 
 export type ExecutiveReport = {

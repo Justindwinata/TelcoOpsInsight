@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { apiPost, uploadCsv } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
 import type { SeedResponse, UploadValidationResponse } from "../types/dashboard";
 import { integerValue } from "../utils/format";
 
@@ -15,10 +16,15 @@ const datasetTypes = [
 ];
 
 export function DataUpload() {
+  const { hasPermission } = useAuth();
   const [seedResult, setSeedResult] = useState<SeedResponse | null>(null);
   const [uploadResult, setUploadResult] = useState<UploadValidationResponse | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [persist, setPersist] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const canSeed = hasPermission("datasets:seed");
+  const canValidate = hasPermission("datasets:validate");
+  const canImport = hasPermission("datasets:import");
 
   async function seedData() {
     setStatus("Seeding sample dataset...");
@@ -41,7 +47,7 @@ export function DataUpload() {
     setStatus("Validating CSV...");
     setSeedResult(null);
     try {
-      const result = await uploadCsv<UploadValidationResponse>(file);
+      const result = await uploadCsv<UploadValidationResponse>(file, persist);
       setUploadResult(result);
       setStatus(result.accepted ? "CSV validation passed." : "CSV validation failed.");
     } catch (error) {
@@ -55,9 +61,10 @@ export function DataUpload() {
         <div className="panel-heading">
           <h3>SQLite Seed</h3>
         </div>
-        <button className="primary-button" type="button" onClick={seedData}>
+        <button className="primary-button" type="button" onClick={seedData} disabled={!canSeed}>
           Seed Sample Data
         </button>
+        {!canSeed ? <p className="permission-message">Your role cannot seed datasets.</p> : null}
         {seedResult ? (
           <dl className="metric-list result-block">
             {Object.entries(seedResult.row_counts).map(([name, count]) => (
@@ -76,10 +83,16 @@ export function DataUpload() {
         </div>
         <div className="upload-row">
           <input ref={inputRef} type="file" accept=".csv,text/csv" />
-          <button className="primary-button" type="button" onClick={submitUpload}>
-            Validate CSV
+          <label className="checkbox-line">
+            <input type="checkbox" checked={persist} disabled={!canImport} onChange={(event) => setPersist(event.target.checked)} />
+            Persist accepted import
+          </label>
+          <button className="primary-button" type="button" onClick={submitUpload} disabled={!canValidate}>
+            {persist ? "Validate And Import" : "Validate CSV"}
           </button>
         </div>
+        {!canValidate ? <p className="permission-message">Your role cannot validate CSV uploads.</p> : null}
+        {!canImport ? <p className="permission-message">Your role cannot persist dataset imports.</p> : null}
         <div className="accepted-types">
           {datasetTypes.map((type) => (
             <span className="badge" key={type}>
