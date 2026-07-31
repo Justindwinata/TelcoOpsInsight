@@ -34,3 +34,33 @@ def test_network_health_endpoint() -> None:
     assert payload["latency_trend"]
     assert payload["packet_loss_trend"]
     assert payload["service_quality_summary"]
+
+
+def test_incidents_endpoint() -> None:
+    response = client.get("/api/dashboard/incidents", params={"severity": "Critical"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["incidents"]
+    assert payload["severity_summary"]
+    assert payload["root_cause_breakdown"]
+
+
+def test_tickets_endpoint() -> None:
+    response = client.get("/api/dashboard/tickets")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ticket_volume"]
+    assert payload["category_breakdown"]
+    assert payload["backlog"] > 0
+
+
+def test_sla_endpoint() -> None:
+    response = client.get("/api/dashboard/sla", params={"service_type": "Enterprise VPN"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["target_vs_actual"]
+    assert payload["breach_count"] >= 0
+    assert payload["mttr_trend"]
