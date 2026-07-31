@@ -1,0 +1,45 @@
+rule_id,metric,condition,threshold,severity,recommendation_title,recommendation_text,recommended_owner
+RULE-001,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Jakarta,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-002,sla_achievement,<,98.0,High,Recover SLA performance in Jakarta,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-003,active_incidents,>,20,Medium,Lower active incident queue in Jakarta,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-004,critical_incidents,>,3,Critical,Stabilize critical incidents in Jakarta,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-005,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Bandung,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-006,sla_achievement,<,98.0,High,Recover SLA performance in Bandung,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-007,active_incidents,>,20,Medium,Lower active incident queue in Bandung,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-008,critical_incidents,>,3,Critical,Stabilize critical incidents in Bandung,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-009,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Surabaya,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-010,sla_achievement,<,98.0,High,Recover SLA performance in Surabaya,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-011,active_incidents,>,20,Medium,Lower active incident queue in Surabaya,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-012,critical_incidents,>,3,Critical,Stabilize critical incidents in Surabaya,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-013,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Medan,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-014,sla_achievement,<,98.0,High,Recover SLA performance in Medan,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-015,active_incidents,>,20,Medium,Lower active incident queue in Medan,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-016,critical_incidents,>,3,Critical,Stabilize critical incidents in Medan,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-017,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Makassar,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-018,sla_achievement,<,98.0,High,Recover SLA performance in Makassar,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-019,active_incidents,>,20,Medium,Lower active incident queue in Makassar,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-020,critical_incidents,>,3,Critical,Stabilize critical incidents in Makassar,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-021,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Semarang,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-022,sla_achievement,<,98.0,High,Recover SLA performance in Semarang,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-023,active_incidents,>,20,Medium,Lower active incident queue in Semarang,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-024,critical_incidents,>,3,Critical,Stabilize critical incidents in Semarang,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-025,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Yogyakarta,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-026,sla_achievement,<,98.0,High,Recover SLA performance in Yogyakarta,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-027,active_incidents,>,20,Medium,Lower active incident queue in Yogyakarta,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-028,critical_incidents,>,3,Critical,Stabilize critical incidents in Yogyakarta,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-029,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Denpasar,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-030,sla_achievement,<,98.0,High,Recover SLA performance in Denpasar,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-031,active_incidents,>,20,Medium,Lower active incident queue in Denpasar,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-032,critical_incidents,>,3,Critical,Stabilize critical incidents in Denpasar,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-033,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Palembang,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-034,sla_achievement,<,98.0,High,Recover SLA performance in Palembang,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-035,active_incidents,>,20,Medium,Lower active incident queue in Palembang,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-036,critical_incidents,>,3,Critical,Stabilize critical incidents in Palembang,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-037,packet_loss_rate,>,1.5,High,Reduce packet loss hotspots in Balikpapan,Prioritize backhaul checks and congestion mitigation in affected regions.,NOC Core
+RULE-038,sla_achievement,<,98.0,High,Recover SLA performance in Balikpapan,Review breached services and open a regional recovery plan.,Customer Assurance
+RULE-039,active_incidents,>,20,Medium,Lower active incident queue in Balikpapan,Rebalance incident ownership and age unresolved incidents daily.,NOC Core
+RULE-040,critical_incidents,>,3,Critical,Stabilize critical incidents in Balikpapan,Start executive escalation and assign command bridge ownership.,NOC Core
+RULE-041,open_tickets,>,180,Medium,Reduce ticket backlog,Add customer assurance capacity for backlog-heavy regions.,Customer Assurance
+RULE-042,avg_latency_ms,>,55,Medium,Investigate latency degradation,Inspect aggregation nodes and traffic utilization.,Field Operations
+RULE-043,technician_utilization,>,85,Medium,Balance field workload,Shift non-critical jobs across neighboring regions.,Field Operations
+RULE-044,customer_satisfaction,<,3.7,High,Protect customer experience,Prioritize repeat complaints and proactive updates.,Customer Assurance

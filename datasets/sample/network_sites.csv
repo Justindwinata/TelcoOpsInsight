@@ -1,0 +1,251 @@
+site_id,site_name,region,city,service_type,site_type,capacity_mbps,active_customers,criticality,latitude,longitude,activation_date
+SITE-0001,JAK Edge Node 0001,Jakarta,Jakarta,IPTV,Edge,3450,1569,Medium,-6.192078,106.833003,2018-08-04
+SITE-0002,BAN Access Node 0002,Bandung,Bandung,Mobile Broadband,Access,1150,1707,Medium,-6.814243,107.455256,2024-03-05
+SITE-0003,SUR Access Node 0003,Surabaya,Surabaya,Fiber Internet,Access,1450,1725,High,-7.421002,112.815677,2018-10-24
+SITE-0004,MED Access Node 0004,Medan,Medan,IPTV,Access,1350,1384,Medium,3.591189,98.607165,2022-09-13
+SITE-0005,MAK Edge Node 0005,Makassar,Makassar,Fiber Internet,Edge,2700,955,Medium,-5.132517,119.574676,2025-05-16
+SITE-0006,SEM Access Node 0006,Semarang,Semarang,Cloud Connectivity,Access,1100,791,Medium,-7.102872,110.506583,2023-10-12
+SITE-0007,YOG Access Node 0007,Yogyakarta,Yogyakarta,IPTV,Access,1150,1741,High,-7.910704,110.189549,2022-09-21
+SITE-0008,DEN Access Node 0008,Denpasar,Denpasar,Fiber Internet,Access,1250,1136,Low,-8.702371,115.207129,2021-12-03
+SITE-0009,PAL Access Node 0009,Palembang,Palembang,IPTV,Access,1450,1370,Medium,-2.847833,104.898198,2024-09-06
+SITE-0010,BAL Aggregation Node 0010,Balikpapan,Balikpapan,Cloud Connectivity,Aggregation,6700,1461,Medium,-1.089025,116.987066,2023-09-03
+SITE-0011,JAK Core Node 0011,Jakarta,Jakarta,Cloud Connectivity,Core,12800,1482,High,-6.174804,106.971335,2022-03-11
+SITE-0012,BAN Access Node 0012,Bandung,Bandung,Fiber Internet,Access,1350,1089,High,-7.028414,107.520793,2021-07-25
+SITE-0013,SUR Access Node 0013,Surabaya,Surabaya,Mobile Broadband,Access,1450,959,Medium,-7.082509,112.909804,2018-04-19
+SITE-0014,MED Access Node 0014,Medan,Medan,Voice,Access,1150,968,Medium,3.580948,98.524344,2025-04-16
+SITE-0015,MAK Access Node 0015,Makassar,Makassar,Mobile Broadband,Access,1000,1387,Medium,-5.154345,119.539437,2025-02-13
+SITE-0016,SEM Edge Node 0016,Semarang,Semarang,Enterprise VPN,Edge,2650,423,High,-7.049043,110.48057,2016-04-19
+SITE-0017,YOG Core Node 0017,Yogyakarta,Yogyakarta,IPTV,Core,13100,1281,Critical,-7.861894,110.327402,2024-07-01
+SITE-0018,DEN Aggregation Node 0018,Denpasar,Denpasar,Cloud Connectivity,Aggregation,6600,971,Low,-8.620201,115.082991,2020-12-04
+SITE-0019,PAL Access Node 0019,Palembang,Palembang,Enterprise VPN,Access,1350,807,Low,-3.019199,104.953,2022-07-11
+SITE-0020,BAL Access Node 0020,Balikpapan,Balikpapan,Mobile Broadband,Access,1200,1343,Medium,-1.369058,116.794157,2023-06-19
+SITE-0021,JAK Access Node 0021,Jakarta,Jakarta,Enterprise VPN,Access,1250,921,Medium,-6.282586,106.981661,2025-05-01
+SITE-0022,BAN Edge Node 0022,Bandung,Bandung,Mobile Broadband,Edge,2800,1519,Medium,-6.834812,107.469563,2020-01-29
+SITE-0023,SUR Access Node 0023,Surabaya,Surabaya,Cloud Connectivity,Access,1400,768,Medium,-7.311675,112.85508,2018-11-16
+SITE-0024,MED Aggregation Node 0024,Medan,Medan,Voice,Aggregation,5650,1564,Medium,3.42413,98.713716,2023-10-19
+SITE-0025,MAK Aggregation Node 0025,Makassar,Makassar,IPTV,Aggregation,6650,889,Medium,-5.220224,119.507293,2016-04-13
+SITE-0026,SEM Access Node 0026,Semarang,Semarang,Enterprise VPN,Access,1100,241,Medium,-7.021812,110.529572,2025-02-03
+SITE-0027,YOG Aggregation Node 0027,Yogyakarta,Yogyakarta,IPTV,Aggregation,6450,1421,Medium,-7.79222,110.476801,2023-02-15
+SITE-0028,DEN Access Node 0028,Denpasar,Denpasar,Voice,Access,1400,1667,Critical,-8.694414,115.328059,2021-04-06
+SITE-0029,PAL Edge Node 0029,Palembang,Palembang,Voice,Edge,3150,1139,Medium,-2.82831,104.611616,2022-09-16
+SITE-0030,BAL Access Node 0030,Balikpapan,Balikpapan,Enterprise VPN,Access,1450,144,Medium,-1.309252,116.919554,2018-12-03
+SITE-0031,JAK Aggregation Node 0031,Jakarta,Jakarta,Cloud Connectivity,Aggregation,6050,1497,Low,-6.31648,106.799593,2017-02-05
+SITE-0032,BAN Access Node 0032,Bandung,Bandung,Enterprise VPN,Access,1300,547,Medium,-6.827995,107.690815,2017-12-15
+SITE-0033,SUR Edge Node 0033,Surabaya,Surabaya,Voice,Edge,3050,1482,High,-7.130554,112.696345,2025-04-01
+SITE-0034,MED Core Node 0034,Medan,Medan,Mobile Broadband,Core,12200,1290,High,3.663805,98.497802,2021-08-08
+SITE-0035,MAK Edge Node 0035,Makassar,Makassar,Mobile Broadband,Edge,3400,938,Low,-5.158616,119.350265,2018-02-15
+SITE-0036,SEM Aggregation Node 0036,Semarang,Semarang,Enterprise VPN,Aggregation,6550,892,Low,-6.950153,110.475426,2017-07-03
+SITE-0037,YOG Access Node 0037,Yogyakarta,Yogyakarta,Cloud Connectivity,Access,1150,1728,High,-7.617378,110.430595,2019-05-03
+SITE-0038,DEN Access Node 0038,Denpasar,Denpasar,Enterprise VPN,Access,1200,538,Low,-8.657765,115.176014,2022-01-13
+SITE-0039,PAL Edge Node 0039,Palembang,Palembang,IPTV,Edge,3400,605,High,-2.954713,104.871488,2019-02-25
+SITE-0040,BAL Access Node 0040,Balikpapan,Balikpapan,Voice,Access,1150,1075,Medium,-1.098254,116.931751,2018-05-30
+SITE-0041,JAK Access Node 0041,Jakarta,Jakarta,Cloud Connectivity,Access,1350,1863,High,-6.136283,106.733717,2017-02-02
+SITE-0042,BAN Aggregation Node 0042,Bandung,Bandung,Voice,Aggregation,7350,892,Medium,-6.919273,107.718923,2023-06-22
+SITE-0043,SUR Aggregation Node 0043,Surabaya,Surabaya,Cloud Connectivity,Aggregation,6850,1623,Medium,-7.117006,112.605344,2021-07-10
+SITE-0044,MED Access Node 0044,Medan,Medan,Cloud Connectivity,Access,1300,894,High,3.681624,98.500719,2016-12-15
+SITE-0045,MAK Access Node 0045,Makassar,Makassar,Fiber Internet,Access,1150,1544,Medium,-5.298955,119.330705,2022-02-05
+SITE-0046,SEM Access Node 0046,Semarang,Semarang,Cloud Connectivity,Access,1400,628,Medium,-6.88872,110.316445,2017-01-31
+SITE-0047,YOG Aggregation Node 0047,Yogyakarta,Yogyakarta,Mobile Broadband,Aggregation,5600,1359,Critical,-7.755901,110.216104,2022-06-04
+SITE-0048,DEN Access Node 0048,Denpasar,Denpasar,Voice,Access,1050,1506,Low,-8.530018,115.26532,2021-11-30
+SITE-0049,PAL Access Node 0049,Palembang,Palembang,IPTV,Access,1050,1610,Medium,-2.846926,104.736707,2018-07-16
+SITE-0050,BAL Core Node 0050,Balikpapan,Balikpapan,Cloud Connectivity,Core,13650,1372,Low,-1.415158,116.882909,2022-07-13
+SITE-0051,JAK Access Node 0051,Jakarta,Jakarta,IPTV,Access,1300,1103,Medium,-6.222765,106.933831,2019-12-22
+SITE-0052,BAN Access Node 0052,Bandung,Bandung,Voice,Access,1100,1194,Low,-6.941705,107.637527,2024-03-01
+SITE-0053,SUR Edge Node 0053,Surabaya,Surabaya,Enterprise VPN,Edge,3400,508,Low,-7.143915,112.921137,2024-04-01
+SITE-0054,MED Access Node 0054,Medan,Medan,Enterprise VPN,Access,1300,673,High,3.488501,98.686684,2025-04-16
+SITE-0055,MAK Aggregation Node 0055,Makassar,Makassar,Mobile Broadband,Aggregation,6900,1401,High,-5.17863,119.296979,2017-09-05
+SITE-0056,SEM Core Node 0056,Semarang,Semarang,Cloud Connectivity,Core,10900,1581,High,-6.963105,110.397945,2023-09-18
+SITE-0057,YOG Aggregation Node 0057,Yogyakarta,Yogyakarta,IPTV,Aggregation,5250,1898,Low,-7.959593,110.460633,2018-02-04
+SITE-0058,DEN Access Node 0058,Denpasar,Denpasar,Mobile Broadband,Access,1150,1065,Low,-8.60071,115.353395,2019-05-22
+SITE-0059,PAL Access Node 0059,Palembang,Palembang,Mobile Broadband,Access,1000,1104,Low,-3.047761,104.791111,2019-10-28
+SITE-0060,BAL Access Node 0060,Balikpapan,Balikpapan,Fiber Internet,Access,1150,885,Critical,-1.108881,116.789417,2017-07-28
+SITE-0061,JAK Access Node 0061,Jakarta,Jakarta,Cloud Connectivity,Access,1250,831,Medium,-6.058636,106.995573,2019-07-09
+SITE-0062,BAN Access Node 0062,Bandung,Bandung,Voice,Access,1300,758,Medium,-6.850648,107.441213,2025-04-22
+SITE-0063,SUR Access Node 0063,Surabaya,Surabaya,Voice,Access,1300,965,Critical,-7.099869,112.841443,2025-05-17
+SITE-0064,MED Access Node 0064,Medan,Medan,Voice,Access,1150,1794,Low,3.592881,98.618259,2018-11-10
+SITE-0065,MAK Access Node 0065,Makassar,Makassar,Fiber Internet,Access,1300,1261,Medium,-4.99698,119.457143,2017-05-09
+SITE-0066,SEM Access Node 0066,Semarang,Semarang,Mobile Broadband,Access,1200,852,Medium,-6.832581,110.352096,2020-06-08
+SITE-0067,YOG Aggregation Node 0067,Yogyakarta,Yogyakarta,Voice,Aggregation,6850,1702,Low,-7.951396,110.277006,2022-03-10
+SITE-0068,DEN Edge Node 0068,Denpasar,Denpasar,Fiber Internet,Edge,2550,1299,Medium,-8.531904,115.368647,2018-09-28
+SITE-0069,PAL Aggregation Node 0069,Palembang,Palembang,Voice,Aggregation,5300,1552,Medium,-2.913045,104.901022,2024-07-07
+SITE-0070,BAL Access Node 0070,Balikpapan,Balikpapan,Mobile Broadband,Access,1450,1661,Medium,-1.144326,116.868287,2017-07-07
+SITE-0071,JAK Access Node 0071,Jakarta,Jakarta,Fiber Internet,Access,1400,1289,Low,-6.223224,106.731662,2020-03-05
+SITE-0072,BAN Access Node 0072,Bandung,Bandung,Enterprise VPN,Access,1250,911,Critical,-6.780831,107.672625,2017-03-24
+SITE-0073,SUR Access Node 0073,Surabaya,Surabaya,Cloud Connectivity,Access,1150,1642,Medium,-7.364122,112.860608,2017-10-14
+SITE-0074,MED Access Node 0074,Medan,Medan,Cloud Connectivity,Access,1000,1326,High,3.529665,98.579193,2017-02-25
+SITE-0075,MAK Aggregation Node 0075,Makassar,Makassar,IPTV,Aggregation,6100,624,Medium,-5.165132,119.39414,2020-08-11
+SITE-0076,SEM Aggregation Node 0076,Semarang,Semarang,Voice,Aggregation,6750,1725,Medium,-6.893869,110.450792,2019-01-07
+SITE-0077,YOG Core Node 0077,Yogyakarta,Yogyakarta,Voice,Core,11150,1647,High,-7.946121,110.245886,2020-09-01
+SITE-0078,DEN Access Node 0078,Denpasar,Denpasar,Cloud Connectivity,Access,1300,1325,High,-8.649986,115.320743,2024-02-24
+SITE-0079,PAL Aggregation Node 0079,Palembang,Palembang,Enterprise VPN,Aggregation,5750,555,Medium,-3.016204,104.927342,2018-07-27
+SITE-0080,BAL Access Node 0080,Balikpapan,Balikpapan,Voice,Access,1250,1124,High,-1.343031,116.734331,2020-03-25
+SITE-0081,JAK Aggregation Node 0081,Jakarta,Jakarta,Voice,Aggregation,6650,1777,Critical,-6.365605,106.742974,2023-03-20
+SITE-0082,BAN Core Node 0082,Bandung,Bandung,Enterprise VPN,Core,13450,396,Medium,-6.933664,107.523604,2024-07-07
+SITE-0083,SUR Access Node 0083,Surabaya,Surabaya,Mobile Broadband,Access,1300,1409,Low,-7.092718,112.893774,2018-02-28
+SITE-0084,MED Access Node 0084,Medan,Medan,Mobile Broadband,Access,1100,1105,High,3.467658,98.715515,2022-06-18
+SITE-0085,MAK Access Node 0085,Makassar,Makassar,Enterprise VPN,Access,1150,376,Medium,-5.085337,119.329246,2019-10-01
+SITE-0086,SEM Edge Node 0086,Semarang,Semarang,IPTV,Edge,3450,1127,Medium,-7.097198,110.51642,2020-06-15
+SITE-0087,YOG Access Node 0087,Yogyakarta,Yogyakarta,Enterprise VPN,Access,1050,992,High,-7.764629,110.270223,2024-02-28
+SITE-0088,DEN Access Node 0088,Denpasar,Denpasar,Fiber Internet,Access,1150,1859,Critical,-8.793923,115.185293,2022-04-08
+SITE-0089,PAL Edge Node 0089,Palembang,Palembang,IPTV,Edge,2600,1706,Low,-2.955741,104.915951,2020-07-24
+SITE-0090,BAL Access Node 0090,Balikpapan,Balikpapan,IPTV,Access,1350,1268,Medium,-1.133871,117.004724,2018-04-17
+SITE-0091,JAK Access Node 0091,Jakarta,Jakarta,Enterprise VPN,Access,1300,852,Medium,-6.326496,106.714285,2016-04-03
+SITE-0092,BAN Access Node 0092,Bandung,Bandung,Voice,Access,1350,1462,High,-6.790588,107.702532,2017-01-25
+SITE-0093,SUR Aggregation Node 0093,Surabaya,Surabaya,IPTV,Aggregation,7150,937,Low,-7.243978,112.749196,2021-10-01
+SITE-0094,MED Aggregation Node 0094,Medan,Medan,Voice,Aggregation,5050,1340,Medium,3.689244,98.642677,2016-07-04
+SITE-0095,MAK Access Node 0095,Makassar,Makassar,IPTV,Access,1350,1003,Medium,-4.996085,119.316071,2024-10-03
+SITE-0096,SEM Aggregation Node 0096,Semarang,Semarang,Mobile Broadband,Aggregation,7050,1697,Medium,-6.853893,110.460594,2023-10-15
+SITE-0097,YOG Aggregation Node 0097,Yogyakarta,Yogyakarta,IPTV,Aggregation,6150,1620,Medium,-7.791732,110.326966,2022-01-11
+SITE-0098,DEN Edge Node 0098,Denpasar,Denpasar,Voice,Edge,2750,1521,High,-8.586085,115.090648,2018-11-15
+SITE-0099,PAL Access Node 0099,Palembang,Palembang,IPTV,Access,1100,1405,Medium,-2.821583,104.819345,2024-06-05
+SITE-0100,BAL Access Node 0100,Balikpapan,Balikpapan,Cloud Connectivity,Access,1300,1573,Medium,-1.308773,116.826133,2018-06-27
+SITE-0101,JAK Access Node 0101,Jakarta,Jakarta,Enterprise VPN,Access,1150,246,Low,-6.330382,106.909417,2019-01-06
+SITE-0102,BAN Access Node 0102,Bandung,Bandung,Enterprise VPN,Access,1150,941,Medium,-6.803502,107.595584,2022-01-10
+SITE-0103,SUR Access Node 0103,Surabaya,Surabaya,Fiber Internet,Access,1450,1259,High,-7.186977,112.815896,2019-07-02
+SITE-0104,MED Access Node 0104,Medan,Medan,Cloud Connectivity,Access,1450,1404,Medium,3.736109,98.517217,2023-08-19
+SITE-0105,MAK Access Node 0105,Makassar,Makassar,Fiber Internet,Access,1350,1292,Medium,-4.982153,119.318719,2017-02-13
+SITE-0106,SEM Aggregation Node 0106,Semarang,Semarang,IPTV,Aggregation,5000,1112,Medium,-7.040394,110.363846,2019-12-18
+SITE-0107,YOG Access Node 0107,Yogyakarta,Yogyakarta,Enterprise VPN,Access,1250,80,Critical,-7.888187,110.332852,2021-10-30
+SITE-0108,DEN Aggregation Node 0108,Denpasar,Denpasar,Fiber Internet,Aggregation,6250,1693,High,-8.731858,115.381999,2019-03-10
+SITE-0109,PAL Aggregation Node 0109,Palembang,Palembang,Voice,Aggregation,5250,1274,Medium,-2.976047,104.890208,2025-05-22
+SITE-0110,BAL Access Node 0110,Balikpapan,Balikpapan,Mobile Broadband,Access,1350,1136,High,-1.381445,116.928794,2018-12-16
+SITE-0111,JAK Aggregation Node 0111,Jakarta,Jakarta,Fiber Internet,Aggregation,6950,1447,High,-6.384931,106.720209,2019-05-25
+SITE-0112,BAN Aggregation Node 0112,Bandung,Bandung,Voice,Aggregation,7050,1284,Medium,-7.061595,107.696431,2022-06-12
+SITE-0113,SUR Access Node 0113,Surabaya,Surabaya,Fiber Internet,Access,1100,1456,High,-7.082513,112.811583,2020-09-23
+SITE-0114,MED Access Node 0114,Medan,Medan,Enterprise VPN,Access,1150,482,Medium,3.58135,98.812402,2016-10-17
+SITE-0115,MAK Aggregation Node 0115,Makassar,Makassar,Mobile Broadband,Aggregation,6500,866,Medium,-5.136924,119.531101,2018-08-12
+SITE-0116,SEM Aggregation Node 0116,Semarang,Semarang,Voice,Aggregation,5600,959,Low,-6.88754,110.424112,2022-08-28
+SITE-0117,YOG Edge Node 0117,Yogyakarta,Yogyakarta,Mobile Broadband,Edge,2750,1432,Medium,-7.77411,110.496996,2017-09-29
+SITE-0118,DEN Core Node 0118,Denpasar,Denpasar,Enterprise VPN,Core,11300,80,Medium,-8.595206,115.041777,2021-06-15
+SITE-0119,PAL Edge Node 0119,Palembang,Palembang,Voice,Edge,2600,1700,High,-3.012929,104.80661,2023-06-06
+SITE-0120,BAL Access Node 0120,Balikpapan,Balikpapan,Cloud Connectivity,Access,1300,1027,Low,-1.14581,116.898837,2021-04-02
+SITE-0121,JAK Core Node 0121,Jakarta,Jakarta,Voice,Core,14950,1528,High,-6.208965,106.684846,2016-02-20
+SITE-0122,BAN Access Node 0122,Bandung,Bandung,Enterprise VPN,Access,1300,589,Low,-7.086814,107.464188,2023-11-16
+SITE-0123,SUR Aggregation Node 0123,Surabaya,Surabaya,Fiber Internet,Aggregation,5300,1010,Medium,-7.188115,112.886061,2020-06-08
+SITE-0124,MED Access Node 0124,Medan,Medan,Mobile Broadband,Access,1350,1117,Medium,3.464001,98.844928,2020-08-24
+SITE-0125,MAK Access Node 0125,Makassar,Makassar,IPTV,Access,1300,1543,Medium,-5.092211,119.503266,2022-10-31
+SITE-0126,SEM Access Node 0126,Semarang,Semarang,Mobile Broadband,Access,1150,1098,Low,-7.087891,110.306106,2019-09-13
+SITE-0127,YOG Access Node 0127,Yogyakarta,Yogyakarta,Mobile Broadband,Access,1150,1310,Low,-7.615955,110.529629,2023-04-24
+SITE-0128,DEN Access Node 0128,Denpasar,Denpasar,Cloud Connectivity,Access,1300,1517,High,-8.61745,115.227066,2017-07-25
+SITE-0129,PAL Edge Node 0129,Palembang,Palembang,Fiber Internet,Edge,2550,936,Low,-2.8782,104.723583,2016-02-29
+SITE-0130,BAL Aggregation Node 0130,Balikpapan,Balikpapan,Enterprise VPN,Aggregation,7100,692,Critical,-1.356762,116.949453,2024-05-31
+SITE-0131,JAK Aggregation Node 0131,Jakarta,Jakarta,Cloud Connectivity,Aggregation,5850,1201,Medium,-6.290317,106.765866,2018-06-20
+SITE-0132,BAN Access Node 0132,Bandung,Bandung,Fiber Internet,Access,1400,641,Medium,-6.942459,107.485857,2016-10-06
+SITE-0133,SUR Access Node 0133,Surabaya,Surabaya,Cloud Connectivity,Access,1400,1522,Medium,-7.376218,112.800356,2023-07-02
+SITE-0134,MED Access Node 0134,Medan,Medan,IPTV,Access,1450,1691,Medium,3.656603,98.719472,2025-01-11
+SITE-0135,MAK Aggregation Node 0135,Makassar,Makassar,Voice,Aggregation,6700,978,Medium,-5.185881,119.482929,2022-11-20
+SITE-0136,SEM Access Node 0136,Semarang,Semarang,Cloud Connectivity,Access,1100,1304,High,-6.923573,110.555802,2024-05-11
+SITE-0137,YOG Aggregation Node 0137,Yogyakarta,Yogyakarta,Enterprise VPN,Aggregation,7350,688,Medium,-7.640489,110.281543,2020-09-23
+SITE-0138,DEN Edge Node 0138,Denpasar,Denpasar,Enterprise VPN,Edge,3500,387,Medium,-8.709509,115.367124,2018-08-25
+SITE-0139,PAL Aggregation Node 0139,Palembang,Palembang,Voice,Aggregation,5950,874,Low,-3.130382,104.950959,2020-08-25
+SITE-0140,BAL Access Node 0140,Balikpapan,Balikpapan,Voice,Access,1050,1445,Medium,-1.077002,116.969751,2021-04-08
+SITE-0141,JAK Aggregation Node 0141,Jakarta,Jakarta,Fiber Internet,Aggregation,6600,1979,High,-6.334128,106.886516,2019-12-28
+SITE-0142,BAN Core Node 0142,Bandung,Bandung,Mobile Broadband,Core,13650,1094,Medium,-6.855951,107.638627,2020-05-21
+SITE-0143,SUR Access Node 0143,Surabaya,Surabaya,Mobile Broadband,Access,1000,1524,High,-7.36977,112.606548,2018-06-06
+SITE-0144,MED Aggregation Node 0144,Medan,Medan,Enterprise VPN,Aggregation,6500,177,Medium,3.445197,98.786981,2022-04-20
+SITE-0145,MAK Access Node 0145,Makassar,Makassar,Mobile Broadband,Access,1350,1491,High,-5.188272,119.453604,2024-10-29
+SITE-0146,SEM Access Node 0146,Semarang,Semarang,Mobile Broadband,Access,1000,996,Medium,-6.941625,110.582482,2017-06-16
+SITE-0147,YOG Aggregation Node 0147,Yogyakarta,Yogyakarta,Fiber Internet,Aggregation,5850,1839,Critical,-7.963457,110.398826,2018-01-03
+SITE-0148,DEN Edge Node 0148,Denpasar,Denpasar,Mobile Broadband,Edge,3000,1313,Critical,-8.753837,115.275183,2018-09-09
+SITE-0149,PAL Access Node 0149,Palembang,Palembang,Fiber Internet,Access,1450,1369,Medium,-2.803693,104.948272,2017-08-18
+SITE-0150,BAL Access Node 0150,Balikpapan,Balikpapan,IPTV,Access,1150,1093,High,-1.20244,116.806734,2017-03-23
+SITE-0151,JAK Aggregation Node 0151,Jakarta,Jakarta,Voice,Aggregation,6350,1461,Medium,-6.085538,107.016586,2020-04-28
+SITE-0152,BAN Edge Node 0152,Bandung,Bandung,Fiber Internet,Edge,2950,1664,Critical,-6.802021,107.67505,2023-12-22
+SITE-0153,SUR Access Node 0153,Surabaya,Surabaya,Enterprise VPN,Access,1350,390,Medium,-7.371067,112.771351,2022-04-08
+SITE-0154,MED Access Node 0154,Medan,Medan,IPTV,Access,1400,1400,Critical,3.451474,98.70269,2017-08-20
+SITE-0155,MAK Access Node 0155,Makassar,Makassar,Cloud Connectivity,Access,1450,1395,Low,-5.318166,119.470887,2023-11-11
+SITE-0156,SEM Edge Node 0156,Semarang,Semarang,Cloud Connectivity,Edge,2850,887,Medium,-6.986005,110.499791,2016-10-18
+SITE-0157,YOG Access Node 0157,Yogyakarta,Yogyakarta,Mobile Broadband,Access,1050,1013,Low,-7.888939,110.540964,2021-12-05
+SITE-0158,DEN Access Node 0158,Denpasar,Denpasar,Voice,Access,1350,1507,Low,-8.793056,115.225349,2019-05-22
+SITE-0159,PAL Aggregation Node 0159,Palembang,Palembang,Mobile Broadband,Aggregation,5100,1053,Low,-2.979415,104.863093,2016-04-11
+SITE-0160,BAL Access Node 0160,Balikpapan,Balikpapan,Fiber Internet,Access,1250,1723,Low,-1.181648,116.978963,2022-01-17
+SITE-0161,JAK Access Node 0161,Jakarta,Jakarta,Fiber Internet,Access,1350,899,Medium,-6.269811,106.749502,2024-07-23
+SITE-0162,BAN Access Node 0162,Bandung,Bandung,IPTV,Access,1200,1560,Critical,-7.03991,107.672615,2017-07-17
+SITE-0163,SUR Access Node 0163,Surabaya,Surabaya,Cloud Connectivity,Access,1300,1683,Medium,-7.256396,112.639718,2021-02-09
+SITE-0164,MED Aggregation Node 0164,Medan,Medan,Voice,Aggregation,5500,1359,Low,3.661516,98.705349,2022-10-26
+SITE-0165,MAK Access Node 0165,Makassar,Makassar,IPTV,Access,1150,654,High,-5.180314,119.515739,2020-02-27
+SITE-0166,SEM Edge Node 0166,Semarang,Semarang,Voice,Edge,2700,587,Medium,-7.010445,110.531966,2018-06-24
+SITE-0167,YOG Aggregation Node 0167,Yogyakarta,Yogyakarta,IPTV,Aggregation,6000,1428,Medium,-7.930884,110.273885,2020-12-18
+SITE-0168,DEN Aggregation Node 0168,Denpasar,Denpasar,Cloud Connectivity,Aggregation,7050,1032,Critical,-8.64632,115.144387,2023-01-06
+SITE-0169,PAL Aggregation Node 0169,Palembang,Palembang,IPTV,Aggregation,6350,828,Low,-2.905588,104.787164,2017-12-19
+SITE-0170,BAL Edge Node 0170,Balikpapan,Balikpapan,Voice,Edge,3650,1240,Critical,-1.195568,116.818502,2017-03-07
+SITE-0171,JAK Edge Node 0171,Jakarta,Jakarta,Voice,Edge,2600,1041,Low,-6.198964,106.997583,2016-11-18
+SITE-0172,BAN Aggregation Node 0172,Bandung,Bandung,Enterprise VPN,Aggregation,5450,431,Low,-6.938192,107.498686,2021-08-19
+SITE-0173,SUR Access Node 0173,Surabaya,Surabaya,Voice,Access,1300,1013,Medium,-7.10954,112.899979,2023-10-25
+SITE-0174,MED Access Node 0174,Medan,Medan,Mobile Broadband,Access,1450,842,Critical,3.418502,98.606762,2016-06-23
+SITE-0175,MAK Edge Node 0175,Makassar,Makassar,Mobile Broadband,Edge,3550,1628,Critical,-5.031677,119.53681,2023-04-01
+SITE-0176,SEM Aggregation Node 0176,Semarang,Semarang,Fiber Internet,Aggregation,7450,1060,Low,-6.824668,110.361806,2025-05-23
+SITE-0177,YOG Access Node 0177,Yogyakarta,Yogyakarta,Fiber Internet,Access,1450,1289,High,-7.748526,110.533323,2021-03-02
+SITE-0178,DEN Aggregation Node 0178,Denpasar,Denpasar,IPTV,Aggregation,6100,1127,Critical,-8.679845,115.347341,2024-01-10
+SITE-0179,PAL Edge Node 0179,Palembang,Palembang,IPTV,Edge,2700,1182,Medium,-2.833588,104.790688,2020-07-11
+SITE-0180,BAL Access Node 0180,Balikpapan,Balikpapan,Voice,Access,1200,1261,Medium,-1.239491,116.79682,2023-08-17
+SITE-0181,JAK Edge Node 0181,Jakarta,Jakarta,Enterprise VPN,Edge,3400,333,Medium,-6.077795,106.850727,2025-05-26
+SITE-0182,BAN Aggregation Node 0182,Bandung,Bandung,Enterprise VPN,Aggregation,7400,701,Low,-7.011736,107.697684,2016-06-04
+SITE-0183,SUR Access Node 0183,Surabaya,Surabaya,Fiber Internet,Access,1150,475,Medium,-7.084079,112.651028,2019-06-07
+SITE-0184,MED Aggregation Node 0184,Medan,Medan,Enterprise VPN,Aggregation,6400,319,Low,3.462686,98.729583,2022-02-23
+SITE-0185,MAK Access Node 0185,Makassar,Makassar,Mobile Broadband,Access,1400,1231,Medium,-5.196748,119.291273,2023-05-03
+SITE-0186,SEM Access Node 0186,Semarang,Semarang,Fiber Internet,Access,1350,1384,High,-7.023597,110.475345,2019-05-01
+SITE-0187,YOG Access Node 0187,Yogyakarta,Yogyakarta,Voice,Access,1350,1037,Low,-7.956222,110.231946,2021-11-24
+SITE-0188,DEN Edge Node 0188,Denpasar,Denpasar,Cloud Connectivity,Edge,3300,1814,Medium,-8.74466,115.275621,2016-06-20
+SITE-0189,PAL Access Node 0189,Palembang,Palembang,Mobile Broadband,Access,1200,1347,Medium,-2.874445,104.866069,2021-08-24
+SITE-0190,BAL Aggregation Node 0190,Balikpapan,Balikpapan,IPTV,Aggregation,6900,1174,Medium,-1.18797,116.836688,2022-07-13
+SITE-0191,JAK Access Node 0191,Jakarta,Jakarta,Mobile Broadband,Access,1250,1795,Medium,-6.364664,106.774765,2018-09-28
+SITE-0192,BAN Access Node 0192,Bandung,Bandung,Mobile Broadband,Access,1050,1296,Low,-6.842527,107.725495,2024-04-28
+SITE-0193,SUR Edge Node 0193,Surabaya,Surabaya,IPTV,Edge,2900,985,Medium,-7.166856,112.816354,2020-09-15
+SITE-0194,MED Access Node 0194,Medan,Medan,Fiber Internet,Access,1450,1728,Critical,3.441842,98.675005,2024-06-02
+SITE-0195,MAK Access Node 0195,Makassar,Makassar,Fiber Internet,Access,1100,1159,Low,-5.002261,119.49432,2021-07-14
+SITE-0196,SEM Access Node 0196,Semarang,Semarang,Fiber Internet,Access,1400,1014,Medium,-7.117453,110.312247,2020-07-01
+SITE-0197,YOG Access Node 0197,Yogyakarta,Yogyakarta,Enterprise VPN,Access,1200,594,High,-7.771888,110.480828,2021-07-18
+SITE-0198,DEN Edge Node 0198,Denpasar,Denpasar,Fiber Internet,Edge,3500,1321,High,-8.74657,115.129572,2016-10-09
+SITE-0199,PAL Aggregation Node 0199,Palembang,Palembang,Mobile Broadband,Aggregation,6100,1501,Medium,-2.977958,104.93134,2021-09-18
+SITE-0200,BAL Access Node 0200,Balikpapan,Balikpapan,Fiber Internet,Access,1300,1431,Low,-1.251483,116.712121,2021-11-19
+SITE-0201,JAK Access Node 0201,Jakarta,Jakarta,Voice,Access,1250,1291,Low,-6.314947,106.884463,2022-06-21
+SITE-0202,BAN Access Node 0202,Bandung,Bandung,Voice,Access,1300,80,Low,-6.810861,107.731528,2019-03-14
+SITE-0203,SUR Aggregation Node 0203,Surabaya,Surabaya,IPTV,Aggregation,5200,1359,Medium,-7.20923,112.6674,2023-10-26
+SITE-0204,MED Aggregation Node 0204,Medan,Medan,Cloud Connectivity,Aggregation,6200,1528,Low,3.673361,98.761361,2021-08-15
+SITE-0205,MAK Access Node 0205,Makassar,Makassar,Cloud Connectivity,Access,1400,1034,High,-4.986765,119.372192,2017-05-17
+SITE-0206,SEM Aggregation Node 0206,Semarang,Semarang,Voice,Aggregation,6150,1535,Low,-7.092607,110.56819,2018-07-14
+SITE-0207,YOG Access Node 0207,Yogyakarta,Yogyakarta,Cloud Connectivity,Access,1450,1320,Low,-7.917606,110.430654,2021-07-11
+SITE-0208,DEN Access Node 0208,Denpasar,Denpasar,Cloud Connectivity,Access,1300,1448,High,-8.754034,115.336175,2017-08-24
+SITE-0209,PAL Aggregation Node 0209,Palembang,Palembang,Mobile Broadband,Aggregation,6900,1203,Low,-2.847085,104.901325,2020-11-17
+SITE-0210,BAL Access Node 0210,Balikpapan,Balikpapan,IPTV,Access,1400,1436,Medium,-1.171303,116.952546,2016-06-23
+SITE-0211,JAK Core Node 0211,Jakarta,Jakarta,Mobile Broadband,Core,11700,1677,Low,-6.147417,106.73314,2021-12-06
+SITE-0212,BAN Access Node 0212,Bandung,Bandung,Cloud Connectivity,Access,1400,1447,Low,-7.014735,107.510466,2024-08-22
+SITE-0213,SUR Access Node 0213,Surabaya,Surabaya,Cloud Connectivity,Access,1300,439,Medium,-7.386399,112.668479,2020-07-02
+SITE-0214,MED Access Node 0214,Medan,Medan,Cloud Connectivity,Access,1000,1513,Medium,3.582902,98.596882,2021-03-12
+SITE-0215,MAK Access Node 0215,Makassar,Makassar,Voice,Access,1150,1878,Medium,-4.984426,119.328838,2022-04-10
+SITE-0216,SEM Aggregation Node 0216,Semarang,Semarang,Enterprise VPN,Aggregation,5100,80,Medium,-6.822233,110.399677,2017-08-19
+SITE-0217,YOG Edge Node 0217,Yogyakarta,Yogyakarta,Cloud Connectivity,Edge,2750,1829,Low,-7.739082,110.42201,2023-01-09
+SITE-0218,DEN Access Node 0218,Denpasar,Denpasar,Enterprise VPN,Access,1200,815,High,-8.59644,115.310077,2017-02-14
+SITE-0219,PAL Access Node 0219,Palembang,Palembang,IPTV,Access,1400,792,Medium,-3.138173,104.864168,2023-07-12
+SITE-0220,BAL Aggregation Node 0220,Balikpapan,Balikpapan,Fiber Internet,Aggregation,5100,2008,High,-1.24778,116.892174,2020-01-22
+SITE-0221,JAK Access Node 0221,Jakarta,Jakarta,Cloud Connectivity,Access,1150,1106,High,-6.369876,106.980078,2024-03-11
+SITE-0222,BAN Access Node 0222,Bandung,Bandung,Mobile Broadband,Access,1050,1547,Medium,-7.071835,107.656221,2024-02-05
+SITE-0223,SUR Access Node 0223,Surabaya,Surabaya,Enterprise VPN,Access,1250,422,Low,-7.207906,112.688259,2017-10-20
+SITE-0224,MED Access Node 0224,Medan,Medan,Mobile Broadband,Access,1050,2159,High,3.718916,98.681749,2024-09-16
+SITE-0225,MAK Access Node 0225,Makassar,Makassar,Mobile Broadband,Access,1400,1679,Medium,-5.029183,119.52379,2022-09-05
+SITE-0226,SEM Access Node 0226,Semarang,Semarang,Mobile Broadband,Access,1050,1070,Low,-6.799558,110.47852,2025-01-14
+SITE-0227,YOG Access Node 0227,Yogyakarta,Yogyakarta,Cloud Connectivity,Access,1000,482,Low,-7.747723,110.418715,2020-11-11
+SITE-0228,DEN Aggregation Node 0228,Denpasar,Denpasar,Cloud Connectivity,Aggregation,5700,993,Medium,-8.541208,115.151645,2018-10-07
+SITE-0229,PAL Aggregation Node 0229,Palembang,Palembang,IPTV,Aggregation,5850,1244,Medium,-3.143813,104.8908,2018-02-01
+SITE-0230,BAL Aggregation Node 0230,Balikpapan,Balikpapan,IPTV,Aggregation,5000,2077,High,-1.305725,116.932371,2023-10-22
+SITE-0231,JAK Access Node 0231,Jakarta,Jakarta,IPTV,Access,1350,1544,High,-6.077371,106.947117,2017-02-09
+SITE-0232,BAN Edge Node 0232,Bandung,Bandung,Enterprise VPN,Edge,2550,136,Low,-6.851674,107.518317,2019-11-26
+SITE-0233,SUR Access Node 0233,Surabaya,Surabaya,Voice,Access,1400,1387,Medium,-7.184438,112.904985,2021-06-15
+SITE-0234,MED Access Node 0234,Medan,Medan,Mobile Broadband,Access,1050,1672,Medium,3.636315,98.590884,2025-03-24
+SITE-0235,MAK Access Node 0235,Makassar,Makassar,Voice,Access,1100,1298,Medium,-5.004803,119.396147,2017-10-10
+SITE-0236,SEM Access Node 0236,Semarang,Semarang,Cloud Connectivity,Access,1450,2100,Critical,-6.941191,110.299849,2016-08-14
+SITE-0237,YOG Access Node 0237,Yogyakarta,Yogyakarta,Voice,Access,1200,1095,Critical,-7.925833,110.424456,2021-09-15
+SITE-0238,DEN Access Node 0238,Denpasar,Denpasar,Mobile Broadband,Access,1150,1107,High,-8.613923,115.289122,2017-08-07
+SITE-0239,PAL Aggregation Node 0239,Palembang,Palembang,Voice,Aggregation,6800,1427,Medium,-3.133378,104.726864,2023-06-07
+SITE-0240,BAL Access Node 0240,Balikpapan,Balikpapan,Mobile Broadband,Access,1000,733,Medium,-1.2345,116.944799,2017-01-16
+SITE-0241,JAK Core Node 0241,Jakarta,Jakarta,Mobile Broadband,Core,10850,1131,Low,-6.217562,106.808477,2017-02-04
+SITE-0242,BAN Aggregation Node 0242,Bandung,Bandung,Enterprise VPN,Aggregation,7200,387,High,-6.761834,107.588698,2021-06-29
+SITE-0243,SUR Core Node 0243,Surabaya,Surabaya,Voice,Core,14750,1765,Low,-7.39106,112.705348,2020-08-12
+SITE-0244,MED Access Node 0244,Medan,Medan,Enterprise VPN,Access,1050,825,Low,3.76269,98.498099,2022-12-20
+SITE-0245,MAK Aggregation Node 0245,Makassar,Makassar,Voice,Aggregation,6550,1419,Medium,-5.097093,119.295263,2023-04-13
+SITE-0246,SEM Aggregation Node 0246,Semarang,Semarang,Mobile Broadband,Aggregation,5250,1747,Medium,-6.944809,110.442066,2023-10-20
+SITE-0247,YOG Access Node 0247,Yogyakarta,Yogyakarta,Cloud Connectivity,Access,1400,1354,High,-7.966988,110.37364,2019-01-10
+SITE-0248,DEN Core Node 0248,Denpasar,Denpasar,Cloud Connectivity,Core,11750,849,High,-8.772832,115.278767,2021-10-20
+SITE-0249,PAL Aggregation Node 0249,Palembang,Palembang,Enterprise VPN,Aggregation,6000,622,High,-2.840729,104.718046,2023-03-11
+SITE-0250,BAL Aggregation Node 0250,Balikpapan,Balikpapan,Mobile Broadband,Aggregation,5200,1384,High,-1.388063,116.837648,2017-08-14

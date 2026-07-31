@@ -1,0 +1,42 @@
+{
+  "project": "TelcoOps Insight",
+  "company": "NusaTel Digital Network",
+  "business_unit": "Network Operations Center",
+  "synthetic_data": true,
+  "seed": 20260001,
+  "period": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "regions": [
+    "Jakarta",
+    "Bandung",
+    "Surabaya",
+    "Medan",
+    "Makassar",
+    "Semarang",
+    "Yogyakarta",
+    "Denpasar",
+    "Palembang",
+    "Balikpapan"
+  ],
+  "service_types": [
+    "Fiber Internet",
+    "Mobile Broadband",
+    "Enterprise VPN",
+    "IPTV",
+    "Voice",
+    "Cloud Connectivity"
+  ],
+  "files": {
+    "network_sites.csv": 250,
+    "network_incidents.csv": 2200,
+    "customer_tickets.csv": 5400,
+    "sla_metrics.csv": 1440,
+    "field_technician_jobs.csv": 1800,
+    "region_performance.csv": 530,
+    "service_quality_metrics.csv": 2650,
+    "recommendation_rules.csv": 44
+  },
+  "disclaimer": "Synthetic demo data only. No real telecom operator data or branding is included."
+}
