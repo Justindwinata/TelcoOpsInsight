@@ -64,3 +64,32 @@ def test_sla_endpoint() -> None:
     assert payload["target_vs_actual"]
     assert payload["breach_count"] >= 0
     assert payload["mttr_trend"]
+
+
+def test_technicians_endpoint() -> None:
+    response = client.get("/api/dashboard/technicians")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["technician_workload"]
+    assert payload["job_status_summary"]
+    assert payload["first_time_fix_rate"] >= 0
+
+
+def test_regions_endpoint() -> None:
+    response = client.get("/api/dashboard/regions")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["region_performance_ranking"]
+    assert payload["region_health_metrics"]
+
+
+def test_recommendations_endpoint() -> None:
+    response = client.get("/api/dashboard/recommendations")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["method"] == "deterministic_rule_based"
+    assert payload["rules_evaluated"] >= 30
+    assert "recommendations" in payload

@@ -3,7 +3,16 @@ from __future__ import annotations
 from fastapi import APIRouter, Query
 
 from app.config import settings
-from app.services.analytics_service import incident_analytics, network_health, overview_metrics, sla_analytics, ticket_analytics
+from app.services.analytics_service import (
+    incident_analytics,
+    network_health,
+    overview_metrics,
+    region_analytics,
+    sla_analytics,
+    technician_analytics,
+    ticket_analytics,
+)
+from app.services.recommendation_service import rule_based_recommendations
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -55,3 +64,22 @@ def dashboard_sla(
     month: str | None = Query(default=None),
 ) -> dict[str, object]:
     return sla_analytics(region=region, service_type=service_type, month=month)
+
+
+@router.get("/technicians")
+def dashboard_technicians(
+    region: str | None = Query(default=None),
+    severity: str | None = Query(default=None),
+    month: str | None = Query(default=None),
+) -> dict[str, object]:
+    return technician_analytics(region=region, severity=severity, month=month)
+
+
+@router.get("/regions")
+def dashboard_regions(month: str | None = Query(default=None)) -> dict[str, object]:
+    return region_analytics(month=month)
+
+
+@router.get("/recommendations")
+def dashboard_recommendations() -> dict[str, object]:
+    return rule_based_recommendations()
