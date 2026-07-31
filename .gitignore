@@ -11,6 +11,9 @@ node_modules/
 dist/
 coverage/
 .vite/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
 
 .DS_Store
 .env
