@@ -25,6 +25,7 @@ def test_upload_valid_dataset_csv() -> None:
     assert payload["dataset_type"] == "network_sites"
     assert payload["rows"] == 250
     assert payload["imported"] is False
+    assert payload["import_id"].startswith("IMP-")
 
 
 def test_upload_invalid_dataset_csv() -> None:
@@ -38,6 +39,7 @@ def test_upload_invalid_dataset_csv() -> None:
     assert payload["accepted"] is False
     assert payload["errors"]
     assert payload["imported"] is False
+    assert payload["import_id"].startswith("IMP-")
 
 
 def test_upload_valid_dataset_can_replace_table_safely() -> None:
@@ -60,6 +62,7 @@ def test_upload_valid_dataset_can_replace_table_safely() -> None:
     payload = response.json()
     assert payload["accepted"] is True
     assert payload["imported"] is True
+    assert payload["import_id"].startswith("IMP-")
     stored = fetch_one("SELECT site_name FROM network_sites WHERE site_id = ?", ("SITE-0001",))
     assert stored is not None
     assert stored["site_name"] == "Jakarta Import Governance Test Node"

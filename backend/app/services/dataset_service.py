@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import csv
+import json
 import sqlite3
 import tempfile
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import BinaryIO
 
@@ -62,6 +65,78 @@ def replace_dataset_table(connection: sqlite3.Connection, dataset_type: str, row
         insert_rows(connection, dataset_type, rows, columns)
 
 
+def ensure_import_history_table(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS import_history (
+            import_id TEXT PRIMARY KEY,
+            filename TEXT NOT NULL,
+            dataset_type TEXT,
+            uploaded_at TEXT NOT NULL,
+            row_count INTEGER NOT NULL,
+            valid_row_count INTEGER NOT NULL,
+            invalid_row_count INTEGER NOT NULL,
+            status TEXT NOT NULL,
+            validation_summary TEXT NOT NULL,
+            actor TEXT
+        )
+        """
+    )
+
+
+def record_import_history(
+    connection: sqlite3.Connection,
+    *,
+    filename: str,
+    dataset_type: str | None,
+    row_count: int,
+    errors: list[str],
+    warnings: list[str],
+    status: str,
+    actor: str | None = None,
+) -> str:
+    ensure_import_history_table(connection)
+    import_id = f"IMP-{uuid.uuid4().hex[:12].upper()}"
+    invalid_row_count = row_count if errors else 0
+    valid_row_count = 0 if errors else row_count
+    validation_summary = json.dumps({"errors": errors, "warnings": warnings}, ensure_ascii=True)
+    connection.execute(
+        """
+        INSERT INTO import_history (
+            import_id, filename, dataset_type, uploaded_at, row_count, valid_row_count,
+            invalid_row_count, status, validation_summary, actor
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            import_id,
+            filename,
+            dataset_type,
+            datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            row_count,
+            valid_row_count,
+            invalid_row_count,
+            status,
+            validation_summary,
+            actor,
+        ),
+    )
+    return import_id
+
+
+def list_import_history() -> list[dict[str, object]]:
+    with get_connection() as connection:
+        ensure_import_history_table(connection)
+        rows = connection.execute("SELECT * FROM import_history ORDER BY uploaded_at DESC").fetchall()
+        return [dict(row) for row in rows]
+
+
+def get_import_history(import_id: str) -> dict[str, object] | None:
+    with get_connection() as connection:
+        ensure_import_history_table(connection)
+        row = connection.execute("SELECT * FROM import_history WHERE import_id = ?", (import_id,)).fetchone()
+        return dict(row) if row else None
+
+
 def seed_sample_dataset(dataset_dir: Path | None = None) -> dict[str, object]:
     source_dir = dataset_dir or settings.dataset_dir
     row_counts: dict[str, int] = {}
@@ -104,6 +179,16 @@ def build_validation_context(dataset_dir: Path | None = None) -> dict[str, set[s
 def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool = False) -> dict[str, object]:
     content = file_stream.read()
     if not content:
+        with get_connection() as connection:
+            import_id = record_import_history(
+                connection,
+                filename=file_name,
+                dataset_type=None,
+                row_count=0,
+                errors=["Uploaded file is empty"],
+                warnings=[],
+                status="rejected",
+            )
         return {
             "accepted": False,
             "dataset_type": None,
@@ -111,6 +196,7 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
             "errors": ["Uploaded file is empty"],
             "warnings": [],
             "imported": False,
+            "import_id": import_id,
         }
 
     with tempfile.NamedTemporaryFile(prefix="telco-upload-", suffix=".csv", delete=False) as temp_file:
@@ -121,20 +207,53 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
         rows = read_csv(temp_path)
         dataset_name = detect_dataset_type(list(rows[0].keys()) if rows else [])
         if dataset_name is None:
+            errors = [f"{file_name} does not match any supported TelcoOps dataset schema"]
+            with get_connection() as connection:
+                import_id = record_import_history(
+                    connection,
+                    filename=file_name,
+                    dataset_type=None,
+                    row_count=len(rows),
+                    errors=errors,
+                    warnings=[],
+                    status="rejected",
+                )
             return {
                 "accepted": False,
                 "dataset_type": None,
                 "rows": len(rows),
-                "errors": [f"{file_name} does not match any supported TelcoOps dataset schema"],
+                "errors": errors,
                 "warnings": [],
                 "imported": False,
+                "import_id": import_id,
             }
         result = validate_single_file(temp_path, build_validation_context(), expected_name=dataset_name)
         imported = False
+        status = "validated" if result.passed else "rejected"
         if persist and result.passed:
             with get_connection() as connection:
                 replace_dataset_table(connection, result.dataset_type, rows)
+                import_id = record_import_history(
+                    connection,
+                    filename=file_name,
+                    dataset_type=result.dataset_type,
+                    row_count=result.rows,
+                    errors=result.errors,
+                    warnings=result.warnings,
+                    status="imported",
+                )
             imported = True
+        else:
+            with get_connection() as connection:
+                import_id = record_import_history(
+                    connection,
+                    filename=file_name,
+                    dataset_type=result.dataset_type,
+                    row_count=result.rows,
+                    errors=result.errors,
+                    warnings=result.warnings,
+                    status=status,
+                )
         return {
             "accepted": result.passed,
             "dataset_type": result.dataset_type,
@@ -142,6 +261,7 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
             "errors": result.errors,
             "warnings": result.warnings,
             "imported": imported,
+            "import_id": import_id,
         }
     finally:
         temp_path.unlink(missing_ok=True)
