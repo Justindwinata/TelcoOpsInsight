@@ -2,10 +2,20 @@ from __future__ import annotations
 
 import csv
 import sqlite3
+import tempfile
 from pathlib import Path
+from typing import BinaryIO
 
 from app.config import settings
 from app.database import get_connection
+
+import sys
+
+ROOT_DIR = Path(__file__).resolve().parents[3]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from scripts.validate_telco_dataset import detect_dataset_type, read_csv, validate_single_file  # noqa: E402
 
 
 CSV_TO_TABLE = {
@@ -67,3 +77,53 @@ def database_has_seed_data() -> bool:
     with get_connection() as connection:
         row = connection.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='network_sites'").fetchone()
         return row is not None
+
+
+def build_validation_context(dataset_dir: Path | None = None) -> dict[str, set[str]]:
+    source_dir = dataset_dir or settings.dataset_dir
+    context: dict[str, set[str]] = {}
+    sites_path = source_dir / "network_sites.csv"
+    incidents_path = source_dir / "network_incidents.csv"
+    if sites_path.exists():
+        context["site_ids"] = {row["site_id"] for row in read_csv(sites_path)}
+    if incidents_path.exists():
+        context["incident_ids"] = {row["incident_id"] for row in read_csv(incidents_path)}
+    return context
+
+
+def validate_uploaded_csv(file_name: str, file_stream: BinaryIO) -> dict[str, object]:
+    content = file_stream.read()
+    if not content:
+        return {
+            "accepted": False,
+            "dataset_type": None,
+            "rows": 0,
+            "errors": ["Uploaded file is empty"],
+            "warnings": [],
+        }
+
+    with tempfile.NamedTemporaryFile(prefix="telco-upload-", suffix=".csv", delete=False) as temp_file:
+        temp_file.write(content)
+        temp_path = Path(temp_file.name)
+
+    try:
+        rows = read_csv(temp_path)
+        dataset_name = detect_dataset_type(list(rows[0].keys()) if rows else [])
+        if dataset_name is None:
+            return {
+                "accepted": False,
+                "dataset_type": None,
+                "rows": len(rows),
+                "errors": [f"{file_name} does not match any supported TelcoOps dataset schema"],
+                "warnings": [],
+            }
+        result = validate_single_file(temp_path, build_validation_context(), expected_name=dataset_name)
+        return {
+            "accepted": result.passed,
+            "dataset_type": result.dataset_type,
+            "rows": result.rows,
+            "errors": result.errors,
+            "warnings": result.warnings,
+        }
+    finally:
+        temp_path.unlink(missing_ok=True)
