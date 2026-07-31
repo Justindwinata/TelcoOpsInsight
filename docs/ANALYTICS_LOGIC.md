@@ -37,6 +37,6 @@ Dashboard metrics follow `docs/METRIC_DEFINITIONS.md`.
 
 Recommendations are implemented in `backend/app/services/recommendation_service.py`.
 
-Rules come from `recommendation_rules.csv` and are evaluated with deterministic comparisons: `>`, `>=`, `<`, `<=`, and `==`. Rules are sorted by severity and returned with observed value, threshold, owner, metric, and region.
+Rules come from `recommendation_rules.csv` and are evaluated with deterministic comparisons: `>`, `>=`, `<`, `<=`, and `==`. Rules are filter-aware where practical, deduplicated by metric/region/title, sorted by severity, and returned with observed value, trigger condition, owner, affected region/service, explanation, and recommended action.
 
 This is rule-based decision support. It is not AI, machine learning, or forecasting.

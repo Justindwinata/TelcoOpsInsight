@@ -57,3 +57,7 @@ Critical sites are sites with criticality `Critical` plus sites with active crit
 ## Safety Rules
 
 Analytics functions must avoid division by zero and return `0`, empty lists, or clear default values instead of `null`, `undefined`, or invalid numbers.
+
+## Filtered Calculations
+
+TOI-0002 applies filters before metric aggregation. Date filters are inclusive. `month` cannot be combined with a date range. Severity maps to incident severity and ticket/job priority where practical.

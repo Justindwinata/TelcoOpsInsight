@@ -10,6 +10,8 @@ Returns service status and synthetic-data-only flag.
 
 ## Datasets
 
+Dataset write and governance endpoints require bearer authentication.
+
 `POST /api/datasets/seed`
 
 Loads sample CSV files from `datasets/sample/` into local SQLite and returns row counts per table.
@@ -23,10 +25,36 @@ Accepts a CSV multipart upload, detects the dataset type from headers, validates
 - `rows`
 - `errors`
 - `warnings`
+- `imported`
+- `import_id`
+
+Use `persist=true` to replace the corresponding SQLite dataset table after validation passes.
+
+`GET /api/datasets/import-history`
+
+Returns persisted upload/import audit records. Requires `imports:read`.
+
+`GET /api/datasets/import-history/{import_id}`
+
+Returns a single import history record.
+
+## Auth
+
+`POST /api/auth/login`
+
+Returns a bearer token and user profile for a demo user.
+
+`GET /api/auth/me`
+
+Returns the current authenticated user.
+
+`POST /api/auth/logout`
+
+Invalidates the current in-memory token.
 
 ## Dashboard
 
-All dashboard endpoints are deterministic and null-safe. Basic filters are supported where practical: `region`, `service_type`, `severity`, and `month`.
+All dashboard endpoints are deterministic and null-safe. Filters are supported where practical: `start_date`, `end_date`, `month`, `region`, `service_type`, `severity`, `status`, and `team`.
 
 `GET /api/dashboard/overview`
 
@@ -40,17 +68,33 @@ Returns uptime trend, latency trend, packet loss trend, and service quality summ
 
 Returns recent incidents, severity summary, monthly incident trend, root cause breakdown, and top root causes.
 
+`GET /api/dashboard/incidents/drilldown`
+
+Returns incident drilldown by severity, root cause, region, active region, and critical incident detail.
+
 `GET /api/dashboard/tickets`
 
 Returns ticket volume, backlog, category breakdown, response/resolution summary, customer segment summary, and repeat complaint rate.
+
+`GET /api/dashboard/tickets/drilldown`
+
+Returns backlog by region/service, category detail, and repeat complaint detail.
 
 `GET /api/dashboard/sla`
 
 Returns SLA target vs actual, breach count, region/service comparison, and MTTR trend.
 
+`GET /api/dashboard/sla/drilldown`
+
+Returns breached SLA detail, breach breakdown by region/service, and MTTR trend.
+
 `GET /api/dashboard/technicians`
 
 Returns technician workload, dispatch time, completion time, first-time fix rate, and job status summary.
+
+`GET /api/dashboard/technicians/drilldown`
+
+Returns workload by region/team, first-time fix by priority, and job detail.
 
 `GET /api/dashboard/regions`
 

@@ -57,8 +57,12 @@ The frontend will run at `http://127.0.0.1:5173` and proxy API calls to the back
 Core backend endpoints:
 
 - `GET /health`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
 - `POST /api/datasets/seed`
 - `POST /api/datasets/upload`
+- `GET /api/datasets/import-history`
 - `GET /api/dashboard/overview`
 - `GET /api/dashboard/network-health`
 - `GET /api/dashboard/incidents`
@@ -89,7 +93,16 @@ Frontend sections:
 python3 scripts/validate_telco_dataset.py
 cd backend && pytest -q
 cd ../frontend && npm run build && npm test
+cd .. && python3 scripts/smoke_toi_0002.py
 ```
+
+## TOI-0002 Additions
+
+- Local authentication prototype with role-aware UI.
+- Server-side permission checks for seed, persisted import, import history, and reports.
+- Shared analytics filters and global frontend filter panel.
+- Safe CSV import replacement and persisted import history.
+- Incident, SLA, ticket, and technician drilldowns.
 
 ## Product Truth
 

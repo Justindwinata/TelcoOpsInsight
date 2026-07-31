@@ -25,7 +25,12 @@ Open:
 Seed SQLite:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/datasets/seed
+TOKEN=$(curl -s -X POST http://127.0.0.1:8000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"noc_manager","password":"telco-demo-2026"}' | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])")
+
+curl -X POST http://127.0.0.1:8000/api/datasets/seed \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ## Frontend
@@ -40,6 +45,8 @@ Open `http://127.0.0.1:5173`.
 
 The Vite dev server proxies `/api` and `/health` to the backend at `http://127.0.0.1:8000`.
 
+Use demo username `noc_manager` and demo password `telco-demo-2026` for full prototype access.
+
 ## Tests And Build
 
 ```bash
@@ -49,4 +56,7 @@ pytest -q
 cd ../frontend
 npm run build
 npm test
+
+cd ..
+python3 scripts/smoke_toi_0002.py
 ```

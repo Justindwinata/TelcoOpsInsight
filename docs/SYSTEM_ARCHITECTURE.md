@@ -28,6 +28,7 @@ The backend is a FastAPI application under `backend/app`.
 - `services/analytics_service.py`: deterministic KPI and dashboard calculations
 - `services/recommendation_service.py`: deterministic rule evaluation
 - `services/report_service.py`: JSON and HTML executive summary assembly
+- `services/auth_service.py`: local demo authentication, bearer tokens, and role permissions
 
 ## Frontend
 
@@ -43,7 +44,7 @@ The frontend is a React + Vite + TypeScript application under `frontend/src`.
 
 ## Persistence
 
-SQLite is stored at `backend/telco_ops.db` and is generated locally from the deterministic sample CSV bundle. The database file is ignored by Git.
+SQLite is stored at `backend/telco_ops.db` and is generated locally from the deterministic sample CSV bundle. The database also stores import history metadata. The database file is ignored by Git.
 
 ## Data Boundary
 
