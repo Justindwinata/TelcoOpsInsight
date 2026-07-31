@@ -110,3 +110,50 @@ export type TechniciansResponse = {
   first_time_fix_rate: number;
   job_status_summary: NamedValue[];
 };
+
+export type RegionMetric = {
+  date: string;
+  region: string;
+  total_sites: string;
+  active_incidents: string;
+  critical_incidents: string;
+  open_tickets: string;
+  affected_customers: string;
+  sla_achievement: string;
+  avg_latency_ms: string;
+  packet_loss_rate: string;
+  technician_utilization: string;
+  customer_satisfaction: string;
+  health_score?: number;
+};
+
+export type RegionsResponse = {
+  region_performance_ranking: RegionMetric[];
+  region_health_metrics: RegionMetric[];
+};
+
+export type SeedResponse = {
+  seeded: boolean;
+  database_path: string;
+  row_counts: Record<string, number>;
+};
+
+export type UploadValidationResponse = {
+  accepted: boolean;
+  dataset_type: string | null;
+  rows: number;
+  errors: string[];
+  warnings: string[];
+};
+
+export type ExecutiveReport = {
+  title: string;
+  company: string;
+  synthetic_data_only: boolean;
+  period: string;
+  overview: OverviewMetrics;
+  top_root_causes: NamedValue[];
+  top_regions: RegionMetric[];
+  recommendations: Recommendation[];
+  limitations: string[];
+};
