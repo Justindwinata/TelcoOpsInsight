@@ -8,14 +8,18 @@ The analytics service reads SQLite tables. If the database has not been seeded, 
 
 ## Filtering
 
-Filters are applied in memory after loading rows:
+Filters are applied in memory after loading rows through the shared `AnalyticsFilters` model:
 
+- `start_date`
+- `end_date`
+- `month`
 - `region`
 - `service_type`
 - `severity`
-- `month`
+- `status`
+- `team`
 
-Severity applies to incident `severity` and job/ticket `priority` where relevant.
+Date ranges are inclusive. `month` cannot be mixed with `start_date` or `end_date`. Severity applies to incident `severity` and job/ticket `priority` where relevant. Team maps to `assigned_team` where the dataset has that field.
 
 ## Calculations
 

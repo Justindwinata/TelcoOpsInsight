@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from datetime import date
 from typing import Iterable
 
 from app.database import fetch_all
+from app.filters import AnalyticsFilters
 from app.services.dataset_service import database_has_seed_data, seed_sample_dataset
 
 
@@ -45,22 +47,84 @@ def percent(part: float, total: float) -> float:
     return round((part / total) * 100, 3) if total else 0.0
 
 
-def apply_filters(
-    data: list[dict[str, object]],
+def normalize_filters(
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    month: str | None = None,
     region: str | None = None,
     service_type: str | None = None,
     severity: str | None = None,
+    status: str | None = None,
+    team: str | None = None,
+) -> AnalyticsFilters:
+    if filters is not None:
+        return filters
+    return AnalyticsFilters(
+        start_date=start_date,
+        end_date=end_date,
+        month=month,
+        region=region,
+        service_type=service_type,
+        severity=severity,
+        status=status,
+        team=team,
+    )
+
+
+def row_date(row: dict[str, object]) -> date | None:
+    value = row.get("date") or str(row.get("timestamp", ""))[:10]
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(str(value))
+    except ValueError:
+        return None
+
+
+def apply_filters(
+    data: list[dict[str, object]],
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
     month: str | None = None,
+    region: str | None = None,
+    service_type: str | None = None,
+    severity: str | None = None,
+    status: str | None = None,
+    team: str | None = None,
 ) -> list[dict[str, object]]:
+    query = normalize_filters(
+        filters,
+        start_date=start_date,
+        end_date=end_date,
+        month=month,
+        region=region,
+        service_type=service_type,
+        severity=severity,
+        status=status,
+        team=team,
+    )
     filtered: list[dict[str, object]] = []
     for row in data:
-        if region and row.get("region") != region:
+        date_value = row_date(row)
+        if query.start_date and (date_value is None or date_value < query.start_date):
             continue
-        if service_type and row.get("service_type") != service_type:
+        if query.end_date and (date_value is None or date_value > query.end_date):
             continue
-        if severity and row.get("severity") != severity and row.get("priority") != severity:
+        if query.region and row.get("region") != query.region:
             continue
-        if month and row.get("month") != month:
+        if query.service_type and row.get("service_type") != query.service_type:
+            continue
+        if query.severity and row.get("severity") != query.severity and row.get("priority") != query.severity:
+            continue
+        if query.status and row.get("status") != query.status:
+            continue
+        if query.team and row.get("assigned_team") != query.team:
+            continue
+        if query.month and row.get("month") != query.month:
             continue
         filtered.append(row)
     return filtered
@@ -93,18 +157,35 @@ def latest_by_region(data: list[dict[str, object]]) -> list[dict[str, object]]:
 
 
 def overview_metrics(
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
     region: str | None = None,
     service_type: str | None = None,
     severity: str | None = None,
+    status: str | None = None,
+    team: str | None = None,
     month: str | None = None,
 ) -> dict[str, object]:
-    site_rows = apply_filters(rows("network_sites"), region=region, service_type=service_type)
-    incident_rows = apply_filters(rows("network_incidents"), region=region, service_type=service_type, severity=severity, month=month)
-    ticket_rows = apply_filters(rows("customer_tickets"), region=region, service_type=service_type, severity=severity, month=month)
-    sla_rows = apply_filters(rows("sla_metrics"), region=region, service_type=service_type, month=month)
-    quality_rows = apply_filters(rows("service_quality_metrics"), region=region, service_type=service_type, month=month)
-    job_rows = apply_filters(rows("field_technician_jobs"), region=region, severity=severity, month=month)
-    region_rows = apply_filters(rows("region_performance"), region=region, month=month)
+    query = normalize_filters(
+        filters,
+        start_date=start_date,
+        end_date=end_date,
+        month=month,
+        region=region,
+        service_type=service_type,
+        severity=severity,
+        status=status,
+        team=team,
+    )
+    site_rows = apply_filters(rows("network_sites"), region=query.region, service_type=query.service_type)
+    incident_rows = apply_filters(rows("network_incidents"), query)
+    ticket_rows = apply_filters(rows("customer_tickets"), query)
+    sla_rows = apply_filters(rows("sla_metrics"), query)
+    quality_rows = apply_filters(rows("service_quality_metrics"), query)
+    job_rows = apply_filters(rows("field_technician_jobs"), query)
+    region_rows = apply_filters(rows("region_performance"), query)
 
     active_incidents = [row for row in incident_rows if row.get("status") in ACTIVE_INCIDENT_STATUSES]
     resolved_incidents = [row for row in incident_rows if row.get("status") in RESOLVED_INCIDENT_STATUSES]
@@ -139,12 +220,17 @@ def overview_metrics(
 
 
 def network_health(
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
     region: str | None = None,
     service_type: str | None = None,
     month: str | None = None,
 ) -> dict[str, object]:
-    sla_rows = apply_filters(rows("sla_metrics"), region=region, service_type=service_type, month=month)
-    quality_rows = apply_filters(rows("service_quality_metrics"), region=region, service_type=service_type, month=month)
+    query = normalize_filters(filters, start_date=start_date, end_date=end_date, month=month, region=region, service_type=service_type)
+    sla_rows = apply_filters(rows("sla_metrics"), query)
+    quality_rows = apply_filters(rows("service_quality_metrics"), query)
     return {
         "uptime_trend": avg_by(sla_rows, "month", "uptime_percentage"),
         "latency_trend": avg_by(quality_rows, "month", "latency_ms"),
@@ -154,12 +240,29 @@ def network_health(
 
 
 def incident_analytics(
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
     region: str | None = None,
     service_type: str | None = None,
     severity: str | None = None,
+    status: str | None = None,
+    team: str | None = None,
     month: str | None = None,
 ) -> dict[str, object]:
-    incident_rows = apply_filters(rows("network_incidents"), region=region, service_type=service_type, severity=severity, month=month)
+    query = normalize_filters(
+        filters,
+        start_date=start_date,
+        end_date=end_date,
+        month=month,
+        region=region,
+        service_type=service_type,
+        severity=severity,
+        status=status,
+        team=team,
+    )
+    incident_rows = apply_filters(rows("network_incidents"), query)
     latest = sorted(incident_rows, key=lambda row: (str(row.get("date", "")), str(row.get("incident_id", ""))), reverse=True)[:80]
     return {
         "incidents": latest,
@@ -171,12 +274,27 @@ def incident_analytics(
 
 
 def ticket_analytics(
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
     region: str | None = None,
     service_type: str | None = None,
     severity: str | None = None,
+    status: str | None = None,
     month: str | None = None,
 ) -> dict[str, object]:
-    ticket_rows = apply_filters(rows("customer_tickets"), region=region, service_type=service_type, severity=severity, month=month)
+    query = normalize_filters(
+        filters,
+        start_date=start_date,
+        end_date=end_date,
+        month=month,
+        region=region,
+        service_type=service_type,
+        severity=severity,
+        status=status,
+    )
+    ticket_rows = apply_filters(rows("customer_tickets"), query)
     backlog = [row for row in ticket_rows if row.get("status") in BACKLOG_TICKET_STATUSES]
     resolved = [row for row in ticket_rows if row.get("resolution_time_minutes") != ""]
     return {
@@ -190,8 +308,17 @@ def ticket_analytics(
     }
 
 
-def sla_analytics(region: str | None = None, service_type: str | None = None, month: str | None = None) -> dict[str, object]:
-    sla_rows = apply_filters(rows("sla_metrics"), region=region, service_type=service_type, month=month)
+def sla_analytics(
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    region: str | None = None,
+    service_type: str | None = None,
+    month: str | None = None,
+) -> dict[str, object]:
+    query = normalize_filters(filters, start_date=start_date, end_date=end_date, month=month, region=region, service_type=service_type)
+    sla_rows = apply_filters(rows("sla_metrics"), query)
     return {
         "target_vs_actual": [
             {"name": item["name"], "target": avg(as_float(row.get("sla_target")) for row in sla_rows if row.get("month") == item["name"]), "actual": item["value"]}
@@ -212,8 +339,28 @@ def sla_analytics(region: str | None = None, service_type: str | None = None, mo
     }
 
 
-def technician_analytics(region: str | None = None, severity: str | None = None, month: str | None = None) -> dict[str, object]:
-    job_rows = apply_filters(rows("field_technician_jobs"), region=region, severity=severity, month=month)
+def technician_analytics(
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    region: str | None = None,
+    severity: str | None = None,
+    status: str | None = None,
+    team: str | None = None,
+    month: str | None = None,
+) -> dict[str, object]:
+    query = normalize_filters(
+        filters,
+        start_date=start_date,
+        end_date=end_date,
+        month=month,
+        region=region,
+        severity=severity,
+        status=status,
+        team=team,
+    )
+    job_rows = apply_filters(rows("field_technician_jobs"), query)
     completed = [row for row in job_rows if row.get("status") in COMPLETED_JOB_STATUSES]
     workload = sorted(count_by(job_rows, "technician_id"), key=lambda item: item["value"], reverse=True)[:20]
     return {
@@ -225,8 +372,16 @@ def technician_analytics(region: str | None = None, severity: str | None = None,
     }
 
 
-def region_analytics(month: str | None = None) -> dict[str, object]:
-    region_rows = apply_filters(rows("region_performance"), month=month)
+def region_analytics(
+    filters: AnalyticsFilters | None = None,
+    *,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    region: str | None = None,
+    month: str | None = None,
+) -> dict[str, object]:
+    query = normalize_filters(filters, start_date=start_date, end_date=end_date, month=month, region=region)
+    region_rows = apply_filters(rows("region_performance"), query)
     latest = latest_by_region(region_rows)
     ranking = []
     for row in latest:
