@@ -68,6 +68,16 @@ def test_tickets_endpoint() -> None:
     assert payload["backlog"] > 0
 
 
+def test_tickets_drilldown_endpoint() -> None:
+    response = client.get("/api/dashboard/tickets/drilldown", params={"region": "Jakarta"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["backlog_by_region"]
+    assert payload["backlog_by_service"]
+    assert "repeat_complaint_detail" in payload
+
+
 def test_sla_endpoint() -> None:
     response = client.get("/api/dashboard/sla", params={"service_type": "Enterprise VPN"})
 
@@ -96,6 +106,16 @@ def test_technicians_endpoint() -> None:
     assert payload["technician_workload"]
     assert payload["job_status_summary"]
     assert payload["first_time_fix_rate"] >= 0
+
+
+def test_technicians_drilldown_endpoint() -> None:
+    response = client.get("/api/dashboard/technicians/drilldown", params={"team": "Field Operations"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["workload_by_region"]
+    assert payload["workload_by_team"]
+    assert payload["first_time_fix_by_priority"]
 
 
 def test_regions_endpoint() -> None:

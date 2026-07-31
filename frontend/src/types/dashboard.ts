@@ -90,6 +90,13 @@ export type TicketsResponse = {
   repeat_complaint_rate: number;
 };
 
+export type TicketDrilldownResponse = {
+  backlog_by_region: NamedValue[];
+  backlog_by_service: NamedValue[];
+  category_detail: NamedValue[];
+  repeat_complaint_detail: Array<Record<string, string>>;
+};
+
 export type SlaPoint = {
   name: string;
   target: number;
@@ -134,6 +141,13 @@ export type TechniciansResponse = {
   completion_time: { average_minutes: number };
   first_time_fix_rate: number;
   job_status_summary: NamedValue[];
+};
+
+export type TechnicianDrilldownResponse = {
+  workload_by_region: NamedValue[];
+  workload_by_team: NamedValue[];
+  first_time_fix_by_priority: NamedValue[];
+  workload_detail: Array<Record<string, string>>;
 };
 
 export type RegionMetric = {

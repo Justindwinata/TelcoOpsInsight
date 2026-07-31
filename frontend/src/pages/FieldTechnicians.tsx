@@ -3,12 +3,13 @@ import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
 import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
-import type { TechniciansResponse } from "../types/dashboard";
+import type { TechnicianDrilldownResponse, TechniciansResponse } from "../types/dashboard";
 import { numberValue, percentageValue } from "../utils/format";
 
 export function FieldTechnicians() {
   const { queryString } = useDashboardFilters();
   const { data, loading, error } = useApi<TechniciansResponse>(`/api/dashboard/technicians${queryString}`);
+  const drilldown = useApi<TechnicianDrilldownResponse>(`/api/dashboard/technicians/drilldown${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading field operations" />;
@@ -56,6 +57,38 @@ export function FieldTechnicians() {
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
               <Bar dataKey="value" fill="#16a34a" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </article>
+      </section>
+      <section className="grid two">
+        <article className="panel chart-panel">
+          <div className="panel-heading">
+            <h3>First-Time Fix By Priority</h3>
+            <span className="badge">Percent</span>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={drilldown.data?.first_time_fix_by_priority ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4ebf2" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(value) => [`${value}%`, "FTF rate"]} />
+              <Bar dataKey="value" fill="#0f88a8" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </article>
+        <article className="panel chart-panel">
+          <div className="panel-heading">
+            <h3>Workload By Team</h3>
+            <span className="badge">Jobs</span>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={drilldown.data?.workload_by_team ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4ebf2" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </article>

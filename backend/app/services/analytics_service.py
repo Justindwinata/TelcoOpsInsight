@@ -325,6 +325,18 @@ def ticket_analytics(
     }
 
 
+def ticket_drilldown(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    ticket_rows = apply_filters(rows("customer_tickets"), filters)
+    backlog = [row for row in ticket_rows if row.get("status") in BACKLOG_TICKET_STATUSES]
+    repeat = [row for row in ticket_rows if as_bool(row.get("repeat_complaint"))]
+    return {
+        "backlog_by_region": sorted(count_by(backlog, "region"), key=lambda item: item["value"], reverse=True),
+        "backlog_by_service": sorted(count_by(backlog, "service_type"), key=lambda item: item["value"], reverse=True),
+        "category_detail": sorted(count_by(ticket_rows, "ticket_category"), key=lambda item: item["value"], reverse=True),
+        "repeat_complaint_detail": repeat[:80],
+    }
+
+
 def sla_analytics(
     filters: AnalyticsFilters | None = None,
     *,
@@ -408,6 +420,26 @@ def technician_analytics(
         "completion_time": {"average_minutes": avg(as_float(row.get("completion_time_minutes")) for row in completed if row.get("completion_time_minutes") != "")},
         "first_time_fix_rate": percent(sum(1 for row in completed if as_bool(row.get("first_time_fix"))), len(completed)),
         "job_status_summary": count_by(job_rows, "status"),
+    }
+
+
+def technician_drilldown(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    job_rows = apply_filters(rows("field_technician_jobs"), filters)
+    completed = [row for row in job_rows if row.get("status") in COMPLETED_JOB_STATUSES]
+    return {
+        "workload_by_region": sorted(count_by(job_rows, "region"), key=lambda item: item["value"], reverse=True),
+        "workload_by_team": sorted(count_by(job_rows, "assigned_team"), key=lambda item: item["value"], reverse=True),
+        "first_time_fix_by_priority": [
+            {
+                "name": priority,
+                "value": percent(
+                    sum(1 for row in completed if row.get("priority") == priority and as_bool(row.get("first_time_fix"))),
+                    sum(1 for row in completed if row.get("priority") == priority),
+                ),
+            }
+            for priority in ["Low", "Medium", "High", "Critical"]
+        ],
+        "workload_detail": sorted(job_rows, key=lambda row: (str(row.get("date", "")), str(row.get("job_id", ""))), reverse=True)[:80],
     }
 
 

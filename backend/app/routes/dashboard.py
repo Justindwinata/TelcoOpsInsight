@@ -13,6 +13,8 @@ from app.services.analytics_service import (
     sla_analytics,
     sla_drilldown,
     technician_analytics,
+    technician_drilldown,
+    ticket_drilldown,
     ticket_analytics,
 )
 from app.services.recommendation_service import rule_based_recommendations
@@ -50,6 +52,11 @@ def dashboard_tickets(filters: AnalyticsFilters = Depends(build_filters)) -> dic
     return with_filter_metadata(ticket_analytics(filters=filters), filters)
 
 
+@router.get("/tickets/drilldown")
+def dashboard_tickets_drilldown(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(ticket_drilldown(filters=filters), filters)
+
+
 @router.get("/sla")
 def dashboard_sla(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(sla_analytics(filters=filters), filters)
@@ -63,6 +70,11 @@ def dashboard_sla_drilldown(filters: AnalyticsFilters = Depends(build_filters)) 
 @router.get("/technicians")
 def dashboard_technicians(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(technician_analytics(filters=filters), filters)
+
+
+@router.get("/technicians/drilldown")
+def dashboard_technicians_drilldown(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(technician_drilldown(filters=filters), filters)
 
 
 @router.get("/regions")

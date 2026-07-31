@@ -3,12 +3,13 @@ import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
 import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
-import type { TicketsResponse } from "../types/dashboard";
+import type { TicketDrilldownResponse, TicketsResponse } from "../types/dashboard";
 import { integerValue, numberValue, percentageValue } from "../utils/format";
 
 export function Tickets() {
   const { queryString } = useDashboardFilters();
   const { data, loading, error } = useApi<TicketsResponse>(`/api/dashboard/tickets${queryString}`);
+  const drilldown = useApi<TicketDrilldownResponse>(`/api/dashboard/tickets/drilldown${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading customer tickets" />;
@@ -71,6 +72,38 @@ export function Tickets() {
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
               <Bar dataKey="value" fill="#16a34a" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </article>
+      </section>
+      <section className="grid two">
+        <article className="panel chart-panel">
+          <div className="panel-heading">
+            <h3>Backlog By Region</h3>
+            <span className="badge">Drilldown</span>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={drilldown.data?.backlog_by_region ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4ebf2" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#dc2626" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </article>
+        <article className="panel chart-panel">
+          <div className="panel-heading">
+            <h3>Backlog By Service</h3>
+            <span className="badge">Open workload</span>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={drilldown.data?.backlog_by_service ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4ebf2" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#d97706" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </article>
