@@ -50,3 +50,63 @@ export type RecommendationsResponse = {
   rules_evaluated: number;
   method: string;
 };
+
+export type Incident = {
+  incident_id: string;
+  date: string;
+  region: string;
+  service_type: string;
+  severity: string;
+  status: string;
+  duration_minutes: string;
+  affected_customers: string;
+  root_cause: string;
+  assigned_team: string;
+};
+
+export type IncidentsResponse = {
+  incidents: Incident[];
+  severity_summary: NamedValue[];
+  incident_trend: NamedValue[];
+  root_cause_breakdown: NamedValue[];
+  top_root_causes: NamedValue[];
+};
+
+export type TicketsResponse = {
+  ticket_volume: NamedValue[];
+  backlog: number;
+  category_breakdown: NamedValue[];
+  response_time_summary: { average_minutes: number };
+  resolution_time_summary: { average_minutes: number };
+  customer_segment_summary: NamedValue[];
+  repeat_complaint_rate: number;
+};
+
+export type SlaPoint = {
+  name: string;
+  target: number;
+  actual: number;
+};
+
+export type SlaComparison = {
+  region: string;
+  service_type: string;
+  sla_target: number;
+  sla_actual: number;
+  breach_count: number;
+};
+
+export type SlaResponse = {
+  target_vs_actual: SlaPoint[];
+  breach_count: number;
+  region_service_comparison: SlaComparison[];
+  mttr_trend: NamedValue[];
+};
+
+export type TechniciansResponse = {
+  technician_workload: NamedValue[];
+  dispatch_time: { average_minutes: number };
+  completion_time: { average_minutes: number };
+  first_time_fix_rate: number;
+  job_status_summary: NamedValue[];
+};
