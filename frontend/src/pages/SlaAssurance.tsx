@@ -3,12 +3,13 @@ import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
 import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
-import type { SlaResponse } from "../types/dashboard";
+import type { SlaDrilldownResponse, SlaResponse } from "../types/dashboard";
 import { integerValue, numberValue } from "../utils/format";
 
 export function SlaAssurance() {
   const { queryString } = useDashboardFilters();
   const { data, loading, error } = useApi<SlaResponse>(`/api/dashboard/sla${queryString}`);
+  const drilldown = useApi<SlaDrilldownResponse>(`/api/dashboard/sla/drilldown${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading SLA assurance" />;
@@ -90,6 +91,53 @@ export function SlaAssurance() {
           </table>
         </div>
       </article>
+      <section className="grid two">
+        <article className="panel chart-panel">
+          <div className="panel-heading">
+            <h3>Breaches By Region</h3>
+            <span className="badge">Drilldown</span>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={drilldown.data?.breaches_by_region ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4ebf2" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#dc2626" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </article>
+        <article className="panel">
+          <div className="panel-heading">
+            <h3>Breached SLA Detail</h3>
+            <span className="badge">{integerValue(drilldown.data?.breach_detail.length ?? 0)} rows</span>
+          </div>
+          <div className="table-wrap compact-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Region</th>
+                  <th>Service</th>
+                  <th>Actual</th>
+                  <th>Gap</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(drilldown.data?.breach_detail ?? []).slice(0, 30).map((row) => (
+                  <tr key={`${row.date}-${row.region}-${row.service_type}`}>
+                    <td>{row.date}</td>
+                    <td>{row.region}</td>
+                    <td>{row.service_type}</td>
+                    <td>{numberValue(row.sla_actual)}%</td>
+                    <td>{numberValue(row.gap, 2)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
     </div>
   );
 }

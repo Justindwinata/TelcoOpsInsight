@@ -6,10 +6,12 @@ from app.config import settings
 from app.filters import AnalyticsFilters, build_filters
 from app.services.analytics_service import (
     incident_analytics,
+    incident_drilldown,
     network_health,
     overview_metrics,
     region_analytics,
     sla_analytics,
+    sla_drilldown,
     technician_analytics,
     ticket_analytics,
 )
@@ -38,6 +40,11 @@ def dashboard_incidents(filters: AnalyticsFilters = Depends(build_filters)) -> d
     return with_filter_metadata(incident_analytics(filters=filters), filters)
 
 
+@router.get("/incidents/drilldown")
+def dashboard_incidents_drilldown(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(incident_drilldown(filters=filters), filters)
+
+
 @router.get("/tickets")
 def dashboard_tickets(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(ticket_analytics(filters=filters), filters)
@@ -46,6 +53,11 @@ def dashboard_tickets(filters: AnalyticsFilters = Depends(build_filters)) -> dic
 @router.get("/sla")
 def dashboard_sla(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(sla_analytics(filters=filters), filters)
+
+
+@router.get("/sla/drilldown")
+def dashboard_sla_drilldown(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(sla_drilldown(filters=filters), filters)
 
 
 @router.get("/technicians")

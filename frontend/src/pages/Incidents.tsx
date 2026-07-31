@@ -2,12 +2,13 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Too
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
 import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
-import type { IncidentsResponse } from "../types/dashboard";
+import type { IncidentDrilldownResponse, IncidentsResponse } from "../types/dashboard";
 import { integerValue } from "../utils/format";
 
 export function Incidents() {
   const { queryString } = useDashboardFilters();
   const { data, loading, error } = useApi<IncidentsResponse>(`/api/dashboard/incidents${queryString}`);
+  const drilldown = useApi<IncidentDrilldownResponse>(`/api/dashboard/incidents/drilldown${queryString}`);
 
   if (loading) {
     return <LoadingState label="Loading incidents" />;
@@ -105,6 +106,53 @@ export function Incidents() {
           </table>
         </div>
       </article>
+      <section className="grid two">
+        <article className="panel chart-panel">
+          <div className="panel-heading">
+            <h3>Active Incidents By Region</h3>
+            <span className="badge">Drilldown</span>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={drilldown.data?.active_by_region ?? []} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4ebf2" />
+              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#dc2626" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </article>
+        <article className="panel">
+          <div className="panel-heading">
+            <h3>Critical Incident Detail</h3>
+            <span className="badge">{integerValue(drilldown.data?.critical_incidents.length ?? 0)} rows</span>
+          </div>
+          <div className="table-wrap compact-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Date</th>
+                  <th>Region</th>
+                  <th>Status</th>
+                  <th>Team</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(drilldown.data?.critical_incidents ?? []).slice(0, 20).map((incident) => (
+                  <tr key={incident.incident_id}>
+                    <td>{incident.incident_id}</td>
+                    <td>{incident.date}</td>
+                    <td>{incident.region}</td>
+                    <td>{incident.status}</td>
+                    <td>{incident.assigned_team}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
     </div>
   );
 }

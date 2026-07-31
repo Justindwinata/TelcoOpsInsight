@@ -509,6 +509,10 @@ select {
   border-radius: 8px;
 }
 
+.compact-table {
+  max-height: 340px;
+}
+
 table {
   width: 100%;
   min-width: 840px;

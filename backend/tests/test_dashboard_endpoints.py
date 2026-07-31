@@ -47,6 +47,17 @@ def test_incidents_endpoint() -> None:
     assert payload["root_cause_breakdown"]
 
 
+def test_incidents_drilldown_endpoint() -> None:
+    response = client.get("/api/dashboard/incidents/drilldown", params={"region": "Jakarta"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["by_severity"]
+    assert payload["by_root_cause"]
+    assert payload["by_region"]
+    assert payload["filter_metadata"]["applied_filters"]["region"] == "Jakarta"
+
+
 def test_tickets_endpoint() -> None:
     response = client.get("/api/dashboard/tickets")
 
@@ -65,6 +76,16 @@ def test_sla_endpoint() -> None:
     assert payload["target_vs_actual"]
     assert payload["breach_count"] >= 0
     assert payload["mttr_trend"]
+
+
+def test_sla_drilldown_endpoint() -> None:
+    response = client.get("/api/dashboard/sla/drilldown", params={"service_type": "Enterprise VPN"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["breach_detail"]
+    assert payload["breaches_by_region"]
+    assert payload["breaches_by_service"]
 
 
 def test_technicians_endpoint() -> None:

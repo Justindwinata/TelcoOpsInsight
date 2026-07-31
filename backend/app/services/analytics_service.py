@@ -273,6 +273,23 @@ def incident_analytics(
     }
 
 
+def incident_drilldown(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    incident_rows = apply_filters(rows("network_incidents"), filters)
+    return {
+        "by_severity": count_by(incident_rows, "severity"),
+        "by_root_cause": sorted(count_by(incident_rows, "root_cause"), key=lambda item: item["value"], reverse=True),
+        "by_region": sorted(count_by(incident_rows, "region"), key=lambda item: item["value"], reverse=True),
+        "active_by_region": sorted(
+            count_by([row for row in incident_rows if row.get("status") in ACTIVE_INCIDENT_STATUSES], "region"),
+            key=lambda item: item["value"],
+            reverse=True,
+        ),
+        "critical_incidents": [
+            row for row in sorted(incident_rows, key=lambda item: str(item.get("date", "")), reverse=True) if row.get("severity") == "Critical"
+        ][:40],
+    }
+
+
 def ticket_analytics(
     filters: AnalyticsFilters | None = None,
     *,
@@ -335,6 +352,28 @@ def sla_analytics(
             }
             for row in sla_rows[:120]
         ],
+        "mttr_trend": avg_by(sla_rows, "month", "mttr_minutes"),
+    }
+
+
+def sla_drilldown(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    sla_rows = apply_filters(rows("sla_metrics"), filters)
+    breached = [row for row in sla_rows if as_float(row.get("sla_actual")) < as_float(row.get("sla_target"))]
+    return {
+        "breach_detail": [
+            {
+                "date": row["date"],
+                "region": row["region"],
+                "service_type": row["service_type"],
+                "sla_target": as_float(row["sla_target"]),
+                "sla_actual": as_float(row["sla_actual"]),
+                "gap": round(as_float(row["sla_target"]) - as_float(row["sla_actual"]), 3),
+                "mttr_minutes": as_float(row["mttr_minutes"]),
+            }
+            for row in breached[:120]
+        ],
+        "breaches_by_region": sorted(sum_by(breached, "region", "breach_count"), key=lambda item: item["value"], reverse=True),
+        "breaches_by_service": sorted(sum_by(breached, "service_type", "breach_count"), key=lambda item: item["value"], reverse=True),
         "mttr_trend": avg_by(sla_rows, "month", "mttr_minutes"),
     }
 

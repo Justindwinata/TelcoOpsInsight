@@ -72,6 +72,14 @@ export type IncidentsResponse = {
   top_root_causes: NamedValue[];
 };
 
+export type IncidentDrilldownResponse = {
+  by_severity: NamedValue[];
+  by_root_cause: NamedValue[];
+  by_region: NamedValue[];
+  active_by_region: NamedValue[];
+  critical_incidents: Incident[];
+};
+
 export type TicketsResponse = {
   ticket_volume: NamedValue[];
   backlog: number;
@@ -100,6 +108,23 @@ export type SlaResponse = {
   target_vs_actual: SlaPoint[];
   breach_count: number;
   region_service_comparison: SlaComparison[];
+  mttr_trend: NamedValue[];
+};
+
+export type SlaBreachDetail = {
+  date: string;
+  region: string;
+  service_type: string;
+  sla_target: number;
+  sla_actual: number;
+  gap: number;
+  mttr_minutes: number;
+};
+
+export type SlaDrilldownResponse = {
+  breach_detail: SlaBreachDetail[];
+  breaches_by_region: NamedValue[];
+  breaches_by_service: NamedValue[];
   mttr_trend: NamedValue[];
 };
 
