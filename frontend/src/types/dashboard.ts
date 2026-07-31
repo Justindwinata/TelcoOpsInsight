@@ -36,3 +36,17 @@ export type Recommendation = {
   recommended_owner: string;
   region: string;
 };
+
+export type NetworkHealthResponse = {
+  uptime_trend: NamedValue[];
+  latency_trend: NamedValue[];
+  packet_loss_trend: NamedValue[];
+  service_quality_summary: NamedValue[];
+};
+
+export type RecommendationsResponse = {
+  recommendations: Recommendation[];
+  triggered_count: number;
+  rules_evaluated: number;
+  method: string;
+};

@@ -120,6 +120,154 @@ input {
   min-width: 0;
 }
 
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panel-heading h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.chart-panel {
+  min-height: 340px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.kpi-card {
+  background: #ffffff;
+  border: 1px solid #d9e2ec;
+  border-left: 4px solid #607086;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 104px;
+}
+
+.kpi-card span {
+  display: block;
+  color: #607086;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.kpi-card strong {
+  display: block;
+  margin-top: 12px;
+  font-size: 28px;
+  line-height: 1.05;
+}
+
+.kpi-card.healthy {
+  border-left-color: #16a34a;
+}
+
+.kpi-card.warning {
+  border-left-color: #d97706;
+}
+
+.kpi-card.critical {
+  border-left-color: #dc2626;
+}
+
+.metric-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.metric-list div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e4ebf2;
+}
+
+.metric-list div:last-child {
+  border-bottom: 0;
+}
+
+.metric-list dt {
+  color: #607086;
+  font-weight: 700;
+}
+
+.metric-list dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.recommendation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.recommendation-item {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #e4ebf2;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.recommendation-item strong {
+  font-size: 14px;
+}
+
+.recommendation-item p {
+  margin: 0;
+  color: #607086;
+  font-size: 13px;
+}
+
+.severity {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: #d9edf5;
+  color: #07506a;
+}
+
+.severity.low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.severity.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.severity.high {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.severity.critical {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.error-state {
+  border-color: #fecaca;
+  color: #991b1b;
+  background: #fff5f5;
+}
+
 .grid {
   display: grid;
   gap: 16px;
@@ -164,7 +312,8 @@ input {
 
   .grid.two,
   .grid.three,
-  .grid.four {
+  .grid.four,
+  .kpi-grid {
     grid-template-columns: 1fr;
   }
 }
