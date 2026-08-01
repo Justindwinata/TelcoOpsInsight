@@ -37,3 +37,22 @@ def test_viewer_cannot_read_audit_logs() -> None:
     response = client.get("/api/audit-logs", headers=auth_headers(client, "viewer"))
 
     assert response.status_code == 403
+
+
+def test_manager_can_export_filtered_audit_csv() -> None:
+    manager = auth_headers(client, "noc_manager")
+    client.get("/api/reports/executive-summary", headers=manager)
+
+    response = client.get("/api/audit-logs/export.csv", params={"action": "reports.generate"}, headers=manager)
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/csv")
+    assert "attachment" in response.headers["content-disposition"]
+    assert "audit_id,timestamp,actor_username,actor_role,action,entity_type,entity_id,summary,status" in response.text
+    assert "reports.generate" in response.text
+
+
+def test_viewer_cannot_export_audit_csv() -> None:
+    response = client.get("/api/audit-logs/export.csv", headers=auth_headers(client, "viewer"))
+
+    assert response.status_code == 403
