@@ -22,3 +22,5 @@ frontend/vite.config.d.ts
 
 datasets/local/
 uploads/
+backups/
+backend/backups/
