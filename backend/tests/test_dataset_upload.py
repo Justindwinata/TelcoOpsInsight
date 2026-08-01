@@ -91,6 +91,47 @@ def test_invalid_persisted_import_does_not_replace_existing_table() -> None:
     assert before == after
 
 
+def test_persisted_import_can_be_rolled_back() -> None:
+    seed_sample_dataset()
+    path = ROOT / "datasets" / "sample" / "network_sites.csv"
+    rows = load_csv(path)
+    original = rows[0]["site_name"]
+    rows[0]["site_name"] = "Rollback Candidate Site"
+    buffer = StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=list(rows[0].keys()))
+    writer.writeheader()
+    writer.writerows(rows)
+    headers = auth_headers(client, "noc_manager")
+
+    import_response = client.post(
+        "/api/datasets/upload",
+        params={"persist": "true"},
+        headers=headers,
+        files={"file": ("network_sites.csv", buffer.getvalue().encode("utf-8"), "text/csv")},
+    )
+    import_id = import_response.json()["import_id"]
+    changed = fetch_one("SELECT site_name FROM network_sites WHERE site_id = ?", ("SITE-0001",))
+
+    rollback_response = client.post(f"/api/datasets/import-history/{import_id}/rollback", headers=headers)
+    restored = fetch_one("SELECT site_name FROM network_sites WHERE site_id = ?", ("SITE-0001",))
+    history = client.get(f"/api/datasets/import-history/{import_id}", headers=headers)
+
+    assert import_response.status_code == 200
+    assert changed is not None
+    assert changed["site_name"] == "Rollback Candidate Site"
+    assert rollback_response.status_code == 200
+    assert rollback_response.json()["rolled_back"] is True
+    assert restored is not None
+    assert restored["site_name"] == original
+    assert history.json()["status"] == "rolled_back"
+
+
+def test_viewer_cannot_rollback_import() -> None:
+    response = client.post("/api/datasets/import-history/IMP-NOPE/rollback", headers=auth_headers(client, "viewer"))
+
+    assert response.status_code == 403
+
+
 def test_analyst_can_validate_but_cannot_persist_import() -> None:
     path = ROOT / "datasets" / "sample" / "network_sites.csv"
     response = client.post(

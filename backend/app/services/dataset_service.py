@@ -56,6 +56,30 @@ def insert_rows(connection: sqlite3.Connection, table_name: str, rows: list[dict
     connection.executemany(f'INSERT INTO "{table_name}" ({column_list}) VALUES ({placeholders})', values)
 
 
+def table_exists(connection: sqlite3.Connection, table_name: str) -> bool:
+    row = connection.execute("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", (table_name,)).fetchone()
+    return row is not None
+
+
+def read_table_snapshot(connection: sqlite3.Connection, table_name: str) -> dict[str, object]:
+    if not table_exists(connection, table_name):
+        return {"table_exists": False, "columns": [], "rows": []}
+    columns = [row["name"] for row in connection.execute(f'PRAGMA table_info("{table_name}")').fetchall()]
+    rows = [dict(row) for row in connection.execute(f'SELECT * FROM "{table_name}"').fetchall()]
+    return {"table_exists": True, "columns": columns, "rows": rows}
+
+
+def restore_table_snapshot(connection: sqlite3.Connection, table_name: str, snapshot: dict[str, object]) -> None:
+    if not snapshot.get("table_exists"):
+        connection.execute(f'DROP TABLE IF EXISTS "{table_name}"')
+        return
+    columns = [str(column) for column in snapshot.get("columns", [])]
+    rows = [{str(key): str(value) for key, value in row.items()} for row in snapshot.get("rows", [])]  # type: ignore[union-attr]
+    create_table(connection, table_name, columns)
+    if rows:
+        insert_rows(connection, table_name, rows, columns)
+
+
 def replace_dataset_table(connection: sqlite3.Connection, dataset_type: str, rows: list[dict[str, str]]) -> None:
     if dataset_type not in DATASET_TYPE_TO_FILE:
         raise ValueError(f"Unsupported dataset type: {dataset_type}")
@@ -81,6 +105,41 @@ def ensure_import_history_table(connection: sqlite3.Connection) -> None:
             actor TEXT
         )
         """
+        )
+
+
+def ensure_import_snapshot_table(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS import_snapshots (
+            import_id TEXT PRIMARY KEY,
+            dataset_type TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            snapshot_json TEXT NOT NULL
+        )
+        """
+    )
+
+
+def record_import_snapshot(
+    connection: sqlite3.Connection,
+    *,
+    import_id: str,
+    dataset_type: str,
+    snapshot: dict[str, object],
+) -> None:
+    ensure_import_snapshot_table(connection)
+    connection.execute(
+        """
+        INSERT INTO import_snapshots (import_id, dataset_type, created_at, snapshot_json)
+        VALUES (?, ?, ?, ?)
+        """,
+        (
+            import_id,
+            dataset_type,
+            datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            json.dumps(snapshot, ensure_ascii=True),
+        ),
     )
 
 
@@ -121,6 +180,11 @@ def record_import_history(
         ),
     )
     return import_id
+
+
+def update_import_status(connection: sqlite3.Connection, import_id: str, status: str) -> None:
+    ensure_import_history_table(connection)
+    connection.execute("UPDATE import_history SET status = ? WHERE import_id = ?", (status, import_id))
 
 
 def list_import_history() -> list[dict[str, object]]:
@@ -234,7 +298,6 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
         status = "validated" if result.passed else "rejected"
         if persist and result.passed:
             with get_connection() as connection:
-                replace_dataset_table(connection, result.dataset_type, rows)
                 import_id = record_import_history(
                     connection,
                     filename=file_name,
@@ -245,6 +308,13 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
                     status="imported",
                     actor=actor,
                 )
+                record_import_snapshot(
+                    connection,
+                    import_id=import_id,
+                    dataset_type=result.dataset_type,
+                    snapshot=read_table_snapshot(connection, result.dataset_type),
+                )
+                replace_dataset_table(connection, result.dataset_type, rows)
             imported = True
         else:
             with get_connection() as connection:
@@ -269,3 +339,26 @@ def validate_uploaded_csv(file_name: str, file_stream: BinaryIO, persist: bool =
         }
     finally:
         temp_path.unlink(missing_ok=True)
+
+
+def rollback_import(import_id: str) -> dict[str, object]:
+    with get_connection() as connection:
+        ensure_import_history_table(connection)
+        ensure_import_snapshot_table(connection)
+        import_row = connection.execute("SELECT * FROM import_history WHERE import_id = ?", (import_id,)).fetchone()
+        if import_row is None:
+            raise ValueError("Import history record not found")
+        if import_row["status"] != "imported":
+            raise ValueError("Only imports with status 'imported' can be rolled back")
+        snapshot_row = connection.execute("SELECT * FROM import_snapshots WHERE import_id = ?", (import_id,)).fetchone()
+        if snapshot_row is None:
+            raise ValueError("Rollback snapshot not found for import")
+        snapshot = json.loads(snapshot_row["snapshot_json"])
+        restore_table_snapshot(connection, snapshot_row["dataset_type"], snapshot)
+        update_import_status(connection, import_id, "rolled_back")
+        return {
+            "rolled_back": True,
+            "import_id": import_id,
+            "dataset_type": snapshot_row["dataset_type"],
+            "restored_rows": len(snapshot.get("rows", [])),
+        }
