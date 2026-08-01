@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:smoke": "python3 ../scripts/smoke_toi_0002.py",
+    "test:e2e": "python3 ../scripts/smoke_toi_0003.py",
     "preview": "vite preview"
   },
   "dependencies": {
