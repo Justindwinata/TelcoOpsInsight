@@ -21,6 +21,7 @@ ROLE_PERMISSIONS = {
         "imports:read",
         "reports:read",
         "recommendations:read",
+        "audit:read",
     },
     "Service Assurance Lead": {"dashboard:read", "reports:read", "recommendations:read", "imports:read"},
     "Field Operations Lead": {"dashboard:read", "reports:read", "recommendations:read"},
@@ -179,6 +180,16 @@ def user_to_profile(user: DemoUser) -> dict[str, object]:
 def login(username: str, password: str) -> dict[str, object]:
     user = get_user_by_username(username)
     if user is None or not verify_password(password, user):
+        from app.services.audit_service import record_audit
+
+        record_audit(
+            actor_username=username,
+            actor_role=None,
+            action="auth.login",
+            entity_type="session",
+            summary="Login failed",
+            status="failure",
+        )
         raise HTTPException(status_code=401, detail="Invalid username or password")
     token = secrets.token_urlsafe(32)
     now = utc_now()
@@ -197,16 +208,47 @@ def login(username: str, password: str) -> dict[str, object]:
                 expires_at.isoformat(),
             ),
         )
+    from app.services.audit_service import record_audit
+
+    record_audit(
+        actor_username=user.username,
+        actor_role=user.role,
+        action="auth.login",
+        entity_type="session",
+        summary="Login succeeded",
+        status="success",
+    )
     return {"access_token": token, "token_type": "bearer", "expires_at": expires_at.isoformat(), "user": user_to_profile(user)}
 
 
 def logout(token: str) -> None:
     ensure_auth_tables()
+    user = None
     with get_connection() as connection:
+        row = connection.execute(
+            """
+            SELECT users.username, users.role
+            FROM sessions JOIN users ON users.user_id = sessions.user_id
+            WHERE sessions.token_hash = ?
+            """,
+            (hash_token(token),),
+        ).fetchone()
+        if row:
+            user = row
         connection.execute(
             "UPDATE sessions SET revoked_at = ? WHERE token_hash = ? AND revoked_at IS NULL",
             (utc_now().isoformat(), hash_token(token)),
         )
+    from app.services.audit_service import record_audit
+
+    record_audit(
+        actor_username=user["username"] if user else None,
+        actor_role=user["role"] if user else None,
+        action="auth.logout",
+        entity_type="session",
+        summary="Logout requested",
+        status="success",
+    )
 
 
 def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security)) -> DemoUser:
@@ -245,6 +287,17 @@ def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(
 
 def ensure_permission(user: DemoUser, permission: str) -> None:
     if permission not in user.permissions:
+        from app.services.audit_service import record_audit
+
+        record_audit(
+            actor_username=user.username,
+            actor_role=user.role,
+            action="permission.denied",
+            entity_type="permission",
+            entity_id=permission,
+            summary=f"Permission denied: {permission}",
+            status="denied",
+        )
         raise HTTPException(status_code=403, detail=f"Permission denied: {permission}")
 
 

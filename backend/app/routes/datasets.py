@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from app.config import settings
 from app.schemas import ImportHistoryEntry, SeedResponse, ValidationResponse
 from app.services.auth_service import DemoUser, ensure_permission, require_permission
+from app.services.audit_service import record_audit
 from app.services.dataset_service import get_import_history, list_import_history, seed_sample_dataset, validate_uploaded_csv
 
 
@@ -12,8 +13,17 @@ router = APIRouter(prefix=f"{settings.api_prefix}/datasets", tags=["datasets"])
 
 
 @router.post("/seed", response_model=SeedResponse)
-def seed_dataset(_: DemoUser = Depends(require_permission("datasets:seed"))) -> dict[str, object]:
-    return seed_sample_dataset()
+def seed_dataset(user: DemoUser = Depends(require_permission("datasets:seed"))) -> dict[str, object]:
+    result = seed_sample_dataset()
+    record_audit(
+        actor_username=user.username,
+        actor_role=user.role,
+        action="datasets.seed",
+        entity_type="dataset",
+        summary="Seeded sample dataset into SQLite",
+        status="success",
+    )
+    return result
 
 
 @router.post("/upload", response_model=ValidationResponse)
@@ -24,7 +34,17 @@ async def upload_dataset(
 ) -> dict[str, object]:
     if persist:
         ensure_permission(user, "datasets:import")
-    return validate_uploaded_csv(file.filename or "upload.csv", file.file, persist=persist, actor=user.username)
+    result = validate_uploaded_csv(file.filename or "upload.csv", file.file, persist=persist, actor=user.username)
+    record_audit(
+        actor_username=user.username,
+        actor_role=user.role,
+        action="datasets.import" if result.get("imported") else "datasets.validate",
+        entity_type="dataset",
+        entity_id=str(result.get("import_id") or ""),
+        summary=f"CSV upload {result.get('dataset_type') or 'unknown'} accepted={result.get('accepted')}",
+        status="success" if result.get("accepted") else "rejected",
+    )
+    return result
 
 
 @router.get("/import-history", response_model=list[ImportHistoryEntry])
