@@ -47,4 +47,5 @@ class UserProfile(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    expires_at: str | None = None
     user: UserProfile

@@ -4,9 +4,12 @@ import hashlib
 import hmac
 import secrets
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from app.database import get_connection
 
 
 ROLE_PERMISSIONS = {
@@ -78,11 +81,86 @@ DEMO_USERS = {
 }
 
 security = HTTPBearer(auto_error=False)
-ACTIVE_TOKENS: dict[str, str] = {}
+SESSION_HOURS = 8
 
 
 def hash_password(password: str, salt: str) -> str:
     return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 120000).hex()
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc).replace(microsecond=0)
+
+
+def ensure_auth_tables() -> None:
+    with get_connection() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                user_id TEXT PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                display_name TEXT NOT NULL,
+                role TEXT NOT NULL,
+                salt TEXT NOT NULL,
+                password_hash TEXT NOT NULL,
+                active INTEGER NOT NULL,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS sessions (
+                session_id TEXT PRIMARY KEY,
+                token_hash TEXT UNIQUE NOT NULL,
+                user_id TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                expires_at TEXT NOT NULL,
+                revoked_at TEXT,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )
+            """
+        )
+        created_at = utc_now().isoformat()
+        for user in DEMO_USERS.values():
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO users (
+                    user_id, username, display_name, role, salt, password_hash, active, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    f"USR-{user.username}",
+                    user.username,
+                    user.display_name,
+                    user.role,
+                    user.salt,
+                    user.password_hash,
+                    1,
+                    created_at,
+                ),
+            )
+
+
+def user_from_row(row) -> DemoUser:
+    return DemoUser(
+        username=row["username"],
+        display_name=row["display_name"],
+        role=row["role"],
+        salt=row["salt"],
+        password_hash=row["password_hash"],
+    )
+
+
+def get_user_by_username(username: str) -> DemoUser | None:
+    ensure_auth_tables()
+    with get_connection() as connection:
+        row = connection.execute("SELECT * FROM users WHERE username = ? AND active = 1", (username,)).fetchone()
+        return user_from_row(row) if row else None
 
 
 def verify_password(password: str, user: DemoUser) -> bool:
@@ -99,25 +177,64 @@ def user_to_profile(user: DemoUser) -> dict[str, object]:
 
 
 def login(username: str, password: str) -> dict[str, object]:
-    user = DEMO_USERS.get(username)
+    user = get_user_by_username(username)
     if user is None or not verify_password(password, user):
         raise HTTPException(status_code=401, detail="Invalid username or password")
     token = secrets.token_urlsafe(32)
-    ACTIVE_TOKENS[token] = user.username
-    return {"access_token": token, "token_type": "bearer", "user": user_to_profile(user)}
+    now = utc_now()
+    expires_at = now + timedelta(hours=SESSION_HOURS)
+    with get_connection() as connection:
+        connection.execute(
+            """
+            INSERT INTO sessions (session_id, token_hash, user_id, created_at, expires_at, revoked_at)
+            VALUES (?, ?, ?, ?, ?, NULL)
+            """,
+            (
+                f"SES-{secrets.token_hex(12).upper()}",
+                hash_token(token),
+                f"USR-{user.username}",
+                now.isoformat(),
+                expires_at.isoformat(),
+            ),
+        )
+    return {"access_token": token, "token_type": "bearer", "expires_at": expires_at.isoformat(), "user": user_to_profile(user)}
 
 
 def logout(token: str) -> None:
-    ACTIVE_TOKENS.pop(token, None)
+    ensure_auth_tables()
+    with get_connection() as connection:
+        connection.execute(
+            "UPDATE sessions SET revoked_at = ? WHERE token_hash = ? AND revoked_at IS NULL",
+            (utc_now().isoformat(), hash_token(token)),
+        )
 
 
 def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security)) -> DemoUser:
     if credentials is None:
         raise HTTPException(status_code=401, detail="Authentication required")
-    username = ACTIVE_TOKENS.get(credentials.credentials)
-    if username is None or username not in DEMO_USERS:
+    ensure_auth_tables()
+    token_digest = hash_token(credentials.credentials)
+    with get_connection() as connection:
+        row = connection.execute(
+            """
+            SELECT users.*
+            FROM sessions
+            JOIN users ON users.user_id = sessions.user_id
+            WHERE sessions.token_hash = ?
+              AND sessions.revoked_at IS NULL
+              AND users.active = 1
+            """,
+            (token_digest,),
+        ).fetchone()
+        session = connection.execute(
+            "SELECT expires_at FROM sessions WHERE token_hash = ? AND revoked_at IS NULL",
+            (token_digest,),
+        ).fetchone()
+    if row is None or session is None:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-    return DEMO_USERS[username]
+    if datetime.fromisoformat(session["expires_at"]) <= utc_now():
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return user_from_row(row)
 
 
 def ensure_permission(user: DemoUser, permission: str) -> None:

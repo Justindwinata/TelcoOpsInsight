@@ -13,6 +13,7 @@ def test_login_success_and_current_user() -> None:
     assert login.status_code == 200
     payload = login.json()
     assert payload["access_token"]
+    assert payload["expires_at"]
     assert payload["user"]["role"] == "NOC Manager"
     assert "datasets:import" in payload["user"]["permissions"]
 
