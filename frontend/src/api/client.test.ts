@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { apiGet, clearAuth, storeAuth, uploadCsv } from "./client";
+import { apiGet, clearAuth, getStoredToken, storeAuth, uploadCsv } from "./client";
 
 describe("api client", () => {
   afterEach(() => {
@@ -40,5 +40,21 @@ describe("api client", () => {
       "/api/datasets/upload?persist=true",
       expect.objectContaining({ method: "POST", headers: { Authorization: "Bearer abc123" } })
     );
+  });
+
+  it("clears stored auth when API returns 401", async () => {
+    storeAuth({
+      access_token: "expired",
+      token_type: "bearer",
+      user: { username: "viewer", display_name: "Viewer Demo", role: "Viewer", permissions: ["dashboard:read"] }
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 401, json: () => Promise.resolve({ detail: "Session expired" }) })
+    );
+
+    await expect(apiGet("/api/auth/me")).rejects.toThrow("Session expired");
+
+    expect(getStoredToken()).toBeNull();
   });
 });

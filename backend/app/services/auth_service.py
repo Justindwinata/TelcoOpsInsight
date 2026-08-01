@@ -215,6 +215,18 @@ def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(
     ensure_auth_tables()
     token_digest = hash_token(credentials.credentials)
     with get_connection() as connection:
+        session = connection.execute(
+            "SELECT session_id, expires_at FROM sessions WHERE token_hash = ? AND revoked_at IS NULL",
+            (token_digest,),
+        ).fetchone()
+        if session is None:
+            raise HTTPException(status_code=401, detail="Invalid or expired token")
+        if datetime.fromisoformat(session["expires_at"]) <= utc_now():
+            connection.execute(
+                "UPDATE sessions SET revoked_at = ? WHERE session_id = ?",
+                (utc_now().isoformat(), session["session_id"]),
+            )
+            raise HTTPException(status_code=401, detail="Session expired")
         row = connection.execute(
             """
             SELECT users.*
@@ -226,14 +238,8 @@ def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(
             """,
             (token_digest,),
         ).fetchone()
-        session = connection.execute(
-            "SELECT expires_at FROM sessions WHERE token_hash = ? AND revoked_at IS NULL",
-            (token_digest,),
-        ).fetchone()
-    if row is None or session is None:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    if datetime.fromisoformat(session["expires_at"]) <= utc_now():
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    if row is None:
+        raise HTTPException(status_code=401, detail="User is disabled or unavailable")
     return user_from_row(row)
 
 

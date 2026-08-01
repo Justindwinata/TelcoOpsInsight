@@ -46,28 +46,44 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
+async function parseError(response: Response): Promise<string> {
+  try {
+    const payload = await response.json();
+    return typeof payload.detail === "string" ? payload.detail : `API request failed: ${response.status}`;
+  } catch {
+    return `API request failed: ${response.status}`;
+  }
+}
+
+async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    if (response.status === 401) {
+      clearAuth();
+    }
+    throw new Error(await parseError(response));
   }
   return response.json() as Promise<T>;
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
+  return handleResponse<T>(response);
 }
 
 export async function apiGetText(path: string): Promise<string> {
   const response = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    if (response.status === 401) {
+      clearAuth();
+    }
+    throw new Error(await parseError(response));
   }
   return response.text();
 }
 
 export async function apiPost<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, { method: "POST", headers: authHeaders() });
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
-  }
-  return response.json() as Promise<T>;
+  return handleResponse<T>(response);
 }
 
 export async function apiJsonPost<T>(path: string, body: object): Promise<T> {
@@ -77,8 +93,10 @@ export async function apiJsonPost<T>(path: string, body: object): Promise<T> {
     body: JSON.stringify(body)
   });
   if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(detail || `API request failed: ${response.status}`);
+    if (response.status === 401) {
+      clearAuth();
+    }
+    throw new Error(await parseError(response));
   }
   return response.json() as Promise<T>;
 }
@@ -106,7 +124,10 @@ export async function uploadCsv<T>(file: File, persist = false): Promise<T> {
     body: formData
   });
   if (!response.ok) {
-    throw new Error(`Upload failed: ${response.status}`);
+    if (response.status === 401) {
+      clearAuth();
+    }
+    throw new Error(await parseError(response));
   }
   return response.json() as Promise<T>;
 }
