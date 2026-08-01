@@ -194,10 +194,39 @@ select {
   cursor: not-allowed;
 }
 
-.active-filters {
+.active-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin: 10px 0 0;
-  color: #607086;
+  align-items: center;
+}
+
+.filter-summary,
+.filter-warning {
+  display: inline-flex;
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 6px 9px;
   font-size: 13px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.filter-summary {
+  background: #f1f5f9;
+  color: #607086;
+}
+
+.filter-summary.active {
+  background: #e8f3ff;
+  color: #164e7a;
+}
+
+.filter-warning {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
 }
 
 .panel-heading {

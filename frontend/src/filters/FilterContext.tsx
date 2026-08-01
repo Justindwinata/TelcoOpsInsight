@@ -27,6 +27,8 @@ type FilterContextValue = {
   resetFilters: () => void;
   queryString: string;
   activeSummary: string;
+  hasActiveFilters: boolean;
+  validationMessage: string | null;
 };
 
 const FilterContext = createContext<FilterContextValue | null>(null);
@@ -47,15 +49,31 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   const [filters, setFilters] = useState<DashboardFilters>(() => loadFilters());
 
   const value = useMemo<FilterContextValue>(() => {
+    const validationMessage =
+      filters.start_date && filters.end_date && filters.start_date > filters.end_date
+        ? "Start date must be before or equal to end date."
+        : null;
     const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, filterValue]) => {
-      if (filterValue) {
-        params.set(key, filterValue);
-      }
-    });
+    if (!validationMessage) {
+      Object.entries(filters).forEach(([key, filterValue]) => {
+        if (filterValue) {
+          params.set(key, filterValue);
+        }
+      });
+    }
+    const labels: Record<string, string> = {
+      start_date: "Start date",
+      end_date: "End date",
+      month: "Month",
+      region: "Region",
+      service_type: "Service",
+      severity: "Severity",
+      status: "Status"
+    };
     const active = Object.entries(filters)
       .filter(([, filterValue]) => Boolean(filterValue))
-      .map(([key, filterValue]) => `${key.replace("_", " ")}: ${filterValue}`);
+      .map(([key, filterValue]) => `${labels[key] ?? key}: ${filterValue}`);
+    const hasActiveFilters = active.length > 0;
     return {
       filters,
       setFilter(key, filterValue) {
@@ -77,7 +95,9 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
         setFilters(emptyFilters);
       },
       queryString: params.toString() ? `?${params.toString()}` : "",
-      activeSummary: active.length ? active.join(" / ") : "No active filters"
+      activeSummary: hasActiveFilters ? active.join(" / ") : "No active filters",
+      hasActiveFilters,
+      validationMessage
     };
   }, [filters]);
 

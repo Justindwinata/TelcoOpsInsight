@@ -7,7 +7,7 @@ const statuses = ["Open", "Investigating", "Escalated", "Resolved", "Closed", "I
 const months = Array.from({ length: 12 }, (_, index) => `2026-${String(index + 1).padStart(2, "0")}`);
 
 export function FilterPanel() {
-  const { filters, setFilter, resetFilters, activeSummary } = useDashboardFilters();
+  const { filters, setFilter, resetFilters, activeSummary, hasActiveFilters, validationMessage } = useDashboardFilters();
 
   return (
     <section className="filter-panel">
@@ -75,11 +75,14 @@ export function FilterPanel() {
             ))}
           </select>
         </label>
-        <button type="button" className="secondary-button" onClick={resetFilters}>
+        <button type="button" className="secondary-button" onClick={resetFilters} disabled={!hasActiveFilters}>
           Reset Filters
         </button>
       </div>
-      <p className="active-filters">{activeSummary}</p>
+      <div className="active-filter-row" aria-live="polite">
+        <span className={hasActiveFilters ? "filter-summary active" : "filter-summary"}>{activeSummary}</span>
+        {validationMessage ? <span className="filter-warning">{validationMessage}</span> : null}
+      </div>
     </section>
   );
 }
