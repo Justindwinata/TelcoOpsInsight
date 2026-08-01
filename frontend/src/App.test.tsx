@@ -1,9 +1,20 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { App } from "./App";
 import { clearAuth, storeAuth } from "./api/client";
 
-function storeDemoUser(role = "NOC Manager", permissions = ["dashboard:read", "datasets:seed", "datasets:validate", "datasets:import"]) {
+function storeDemoUser(
+  role = "NOC Manager",
+  permissions = [
+    "dashboard:read",
+    "datasets:seed",
+    "datasets:validate",
+    "datasets:import",
+    "imports:read",
+    "reports:read",
+    "recommendations:read"
+  ]
+) {
   storeAuth({
     access_token: "test-token",
     token_type: "bearer",
@@ -28,20 +39,21 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Sign In" })).toBeInTheDocument();
   });
 
-  it("renders the NOC dashboard shell", () => {
+  it("renders the NOC dashboard shell", async () => {
     storeDemoUser();
     render(<App />);
 
-    expect(screen.getByText("TelcoOps Insight")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("TelcoOps Insight")).toBeInTheDocument());
     expect(screen.getAllByText("Executive Overview").length).toBeGreaterThan(0);
     expect(screen.getByText("Synthetic 2026 Dataset")).toBeInTheDocument();
     expect(screen.getByText("NOC Manager Demo")).toBeInTheDocument();
   });
 
-  it("switches dashboard sections from the sidebar", () => {
+  it("switches dashboard sections from the sidebar", async () => {
     storeDemoUser();
     render(<App />);
 
+    await waitFor(() => expect(screen.getByRole("button", { name: "Recommendations" })).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "Recommendations" }));
 
     expect(screen.getAllByText("Recommendations").length).toBeGreaterThan(0);

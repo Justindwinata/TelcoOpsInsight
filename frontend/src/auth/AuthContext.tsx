@@ -1,5 +1,13 @@
-import { createContext, useContext, useMemo, useState } from "react";
-import { clearAuth, getStoredToken, getStoredUser, loginRequest, logoutRequest, type AuthUser } from "../api/client";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  AUTH_CHANGED_EVENT,
+  clearAuth,
+  getStoredToken,
+  getStoredUser,
+  loginRequest,
+  logoutRequest,
+  type AuthUser
+} from "../api/client";
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -14,6 +22,19 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
   const [token, setToken] = useState<string | null>(() => getStoredToken());
+
+  useEffect(() => {
+    function syncAuthState() {
+      setUser(getStoredUser());
+      setToken(getStoredToken());
+    }
+    window.addEventListener(AUTH_CHANGED_EVENT, syncAuthState);
+    window.addEventListener("storage", syncAuthState);
+    return () => {
+      window.removeEventListener(AUTH_CHANGED_EVENT, syncAuthState);
+      window.removeEventListener("storage", syncAuthState);
+    };
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({

@@ -1,6 +1,8 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 const TOKEN_KEY = "telcoops_auth_token";
 const USER_KEY = "telcoops_auth_user";
+const EXPIRES_KEY = "telcoops_auth_expires_at";
+export const AUTH_CHANGED_EVENT = "telcoops-auth-changed";
 
 export type AuthUser = {
   username: string;
@@ -12,10 +14,24 @@ export type AuthUser = {
 export type LoginResponse = {
   access_token: string;
   token_type: string;
+  expires_at?: string | null;
   user: AuthUser;
 };
 
+function emitAuthChanged() {
+  window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+}
+
+function isStoredSessionExpired(): boolean {
+  const expiresAt = localStorage.getItem(EXPIRES_KEY);
+  return Boolean(expiresAt && Number.isFinite(Date.parse(expiresAt)) && Date.parse(expiresAt) <= Date.now());
+}
+
 export function getStoredToken() {
+  if (isStoredSessionExpired()) {
+    clearAuth();
+    return null;
+  }
   return localStorage.getItem(TOKEN_KEY);
 }
 
@@ -27,6 +43,7 @@ export function getStoredUser(): AuthUser | null {
   try {
     return JSON.parse(raw) as AuthUser;
   } catch {
+    clearAuth();
     return null;
   }
 }
@@ -34,11 +51,19 @@ export function getStoredUser(): AuthUser | null {
 export function storeAuth(payload: LoginResponse) {
   localStorage.setItem(TOKEN_KEY, payload.access_token);
   localStorage.setItem(USER_KEY, JSON.stringify(payload.user));
+  if (payload.expires_at) {
+    localStorage.setItem(EXPIRES_KEY, payload.expires_at);
+  } else {
+    localStorage.removeItem(EXPIRES_KEY);
+  }
+  emitAuthChanged();
 }
 
 export function clearAuth() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(EXPIRES_KEY);
+  emitAuthChanged();
 }
 
 function authHeaders(): HeadersInit {
@@ -49,7 +74,13 @@ function authHeaders(): HeadersInit {
 async function parseError(response: Response): Promise<string> {
   try {
     const payload = await response.json();
-    return typeof payload.detail === "string" ? payload.detail : `API request failed: ${response.status}`;
+    if (typeof payload?.error?.message === "string") {
+      return payload.error.message;
+    }
+    if (typeof payload.detail === "string") {
+      return payload.detail;
+    }
+    return `API request failed: ${response.status}`;
   } catch {
     return `API request failed: ${response.status}`;
   }

@@ -57,4 +57,28 @@ describe("api client", () => {
 
     expect(getStoredToken()).toBeNull();
   });
+
+  it("prefers backend error message when present", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+        json: () => Promise.resolve({ detail: "Forbidden", error: { message: "Permission denied: audit:read" } })
+      })
+    );
+
+    await expect(apiGet("/api/audit-logs")).rejects.toThrow("Permission denied: audit:read");
+  });
+
+  it("clears expired stored sessions before requests", async () => {
+    storeAuth({
+      access_token: "expired-before-call",
+      token_type: "bearer",
+      expires_at: new Date(Date.now() - 1000).toISOString(),
+      user: { username: "viewer", display_name: "Viewer Demo", role: "Viewer", permissions: ["dashboard:read"] }
+    });
+
+    expect(getStoredToken()).toBeNull();
+  });
 });

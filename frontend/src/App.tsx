@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { FilterPanel } from "./components/FilterPanel";
 import { FilterProvider } from "./filters/FilterContext";
@@ -56,7 +56,35 @@ function renderSection(section: Section) {
 
 function AppContent() {
   const [activeSection, setActiveSection] = useState<Section>("Executive Overview");
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
+
+  const visibleSections = useMemo(
+    () =>
+      sections.filter((section) => {
+        if (section === "Data Upload") {
+          return (
+            hasPermission("datasets:validate") ||
+            hasPermission("datasets:import") ||
+            hasPermission("datasets:seed") ||
+            hasPermission("imports:read")
+          );
+        }
+        if (section === "Report") {
+          return hasPermission("reports:read");
+        }
+        if (section === "Recommendations") {
+          return hasPermission("recommendations:read");
+        }
+        return hasPermission("dashboard:read");
+      }),
+    [hasPermission]
+  );
+
+  useEffect(() => {
+    if (!visibleSections.includes(activeSection)) {
+      setActiveSection("Executive Overview");
+    }
+  }, [activeSection, visibleSections]);
 
   if (!user) {
     return <Login />;
@@ -71,7 +99,7 @@ function AppContent() {
           <p>Network Operations and Service Assurance Dashboard</p>
         </div>
         <nav className="nav-list" aria-label="Dashboard sections">
-          {sections.map((section) => (
+          {visibleSections.map((section) => (
             <button
               key={section}
               type="button"
