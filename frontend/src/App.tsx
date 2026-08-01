@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { FilterPanel } from "./components/FilterPanel";
 import { FilterProvider } from "./filters/FilterContext";
+import { AuditLogs } from "./pages/AuditLogs";
 import { DataUpload } from "./pages/DataUpload";
 import { ExecutiveOverview } from "./pages/ExecutiveOverview";
 import { FieldTechnicians } from "./pages/FieldTechnicians";
@@ -24,6 +25,7 @@ const sections = [
   "Region Performance",
   "Recommendations",
   "Data Upload",
+  "Audit Logs",
   "Report"
 ] as const;
 
@@ -49,6 +51,8 @@ function renderSection(section: Section) {
       return <Recommendations />;
     case "Data Upload":
       return <DataUpload />;
+    case "Audit Logs":
+      return <AuditLogs />;
     case "Report":
       return <Report />;
   }
@@ -71,6 +75,9 @@ function AppContent() {
         }
         if (section === "Report") {
           return hasPermission("reports:read");
+        }
+        if (section === "Audit Logs") {
+          return hasPermission("audit:read");
         }
         if (section === "Recommendations") {
           return hasPermission("recommendations:read");

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { apiGet, apiPost, uploadCsv } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
-import type { ImportHistoryEntry, SeedResponse, UploadValidationResponse } from "../types/dashboard";
+import type { ImportHistoryEntry, ImportRollbackResponse, SeedResponse, UploadValidationResponse } from "../types/dashboard";
 import { integerValue } from "../utils/format";
 
 const datasetTypes = [
@@ -69,6 +69,21 @@ export function DataUpload() {
       setStatus("Import history loaded.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Import history request failed.");
+    }
+  }
+
+  async function rollbackImport(importId: string) {
+    if (!canImport) {
+      setStatus("Your role cannot rollback dataset imports.");
+      return;
+    }
+    setStatus(`Rolling back ${importId}...`);
+    try {
+      const result = await apiPost<ImportRollbackResponse>(`/api/datasets/import-history/${importId}/rollback`);
+      setStatus(`Rollback restored ${integerValue(result.restored_rows)} rows for ${result.dataset_type}.`);
+      await loadImportHistory();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Rollback request failed.");
     }
   }
 
@@ -155,6 +170,7 @@ export function DataUpload() {
                 <th>Rows</th>
                 <th>Actor</th>
                 <th>Uploaded</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -162,15 +178,27 @@ export function DataUpload() {
                 <tr key={item.import_id}>
                   <td>{item.import_id}</td>
                   <td>{item.dataset_type ?? "Unknown"}</td>
-                  <td>{item.status}</td>
+                  <td>
+                    <span className={`status-badge ${item.status}`}>{item.status}</span>
+                  </td>
                   <td>{integerValue(item.row_count)}</td>
                   <td>{item.actor ?? "Not recorded"}</td>
                   <td>{item.uploaded_at}</td>
+                  <td>
+                    <button
+                      className="secondary-button table-action"
+                      type="button"
+                      disabled={!canImport || item.status !== "imported"}
+                      onClick={() => void rollbackImport(item.import_id)}
+                    >
+                      Rollback
+                    </button>
+                  </td>
                 </tr>
               ))}
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={6}>No import history loaded.</td>
+                  <td colSpan={7}>No import history loaded.</td>
                 </tr>
               ) : null}
             </tbody>

@@ -217,3 +217,27 @@ export type ImportHistoryEntry = {
   validation_summary: string;
   actor: string | null;
 };
+
+export type ImportRollbackResponse = {
+  rolled_back: boolean;
+  import_id: string;
+  dataset_type: string;
+  restored_rows: number;
+};
+
+export type AuditLogEntry = {
+  audit_id: string;
+  timestamp: string;
+  actor_username: string | null;
+  actor_role: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  summary: string;
+  status: string;
+};
+
+export type AuditLogsResponse = {
+  audit_logs: AuditLogEntry[];
+  count: number;
+};

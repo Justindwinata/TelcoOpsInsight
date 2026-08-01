@@ -12,7 +12,8 @@ function storeDemoUser(
     "datasets:import",
     "imports:read",
     "reports:read",
-    "recommendations:read"
+    "recommendations:read",
+    "audit:read"
   ]
 ) {
   storeAuth({
@@ -58,5 +59,17 @@ describe("App", () => {
 
     expect(screen.getAllByText("Recommendations").length).toBeGreaterThan(0);
     expect(screen.getByText("Loading recommendations...")).toBeInTheDocument();
+  });
+
+  it("shows audit navigation only to audit readers", async () => {
+    storeDemoUser();
+    const { rerender } = render(<App />);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Audit Logs" })).toBeInTheDocument());
+
+    clearAuth();
+    storeDemoUser("Viewer", ["dashboard:read", "reports:read"]);
+    rerender(<App />);
+
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Audit Logs" })).not.toBeInTheDocument());
   });
 });

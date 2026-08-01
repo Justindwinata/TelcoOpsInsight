@@ -112,6 +112,17 @@ export async function apiGetText(path: string): Promise<string> {
   return response.text();
 }
 
+export async function apiDownload(path: string): Promise<Blob> {
+  const response = await fetch(`${API_BASE}${path}`, { headers: authHeaders() });
+  if (!response.ok) {
+    if (response.status === 401) {
+      clearAuth();
+    }
+    throw new Error(await parseError(response));
+  }
+  return response.blob();
+}
+
 export async function apiPost<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, { method: "POST", headers: authHeaders() });
   return handleResponse<T>(response);

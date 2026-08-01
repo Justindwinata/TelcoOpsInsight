@@ -192,6 +192,7 @@ select {
 .secondary-button:disabled {
   color: #94a3b8;
   cursor: not-allowed;
+  background: #f8fafc;
 }
 
 .active-filter-row {
@@ -371,6 +372,37 @@ select {
   color: #991b1b;
 }
 
+.status-badge {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-badge.success,
+.status-badge.imported,
+.status-badge.validated {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.failure,
+.status-badge.rejected,
+.status-badge.denied {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.rolled_back {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .error-state {
   border-color: #fecaca;
   color: #991b1b;
@@ -440,6 +472,11 @@ select {
 
 .link-button {
   display: inline-flex;
+}
+
+.table-action {
+  padding: 6px 9px;
+  font-size: 12px;
 }
 
 .accepted-types {
@@ -629,8 +666,18 @@ tbody tr:hover {
   }
 
   .report-header,
-  .upload-row {
+  .upload-row,
+  .topbar,
+  .user-chip {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .topbar {
+    gap: 12px;
+  }
+
+  .data-pill {
+    width: fit-content;
   }
 }
