@@ -386,3 +386,39 @@ export type AssetDetailResponse = {
   assets: Array<Record<string, string>>;
   total: number;
 };
+
+export type MaintenanceJob = {
+  job_id?: string;
+  date: string;
+  region: string;
+  technician_id?: string;
+  assigned_team?: string;
+  job_type: string;
+  priority?: string;
+  status: string;
+  related_incident_id?: string;
+  completion_time_minutes?: string;
+  first_time_fix?: string;
+};
+
+export type MaintenanceResponse = {
+  total_jobs: number;
+  preventive_count: number;
+  corrective_count: number;
+  installation_count: number;
+  audit_count: number;
+  upcoming_count: number;
+  in_progress_count: number;
+  completed_count: number;
+  avg_completion_time_minutes: number;
+  avg_dispatch_time_minutes: number;
+  first_time_fix_rate: number;
+  job_type_breakdown: Record<string, number>;
+  status_breakdown: Record<string, number>;
+  by_region: NamedValue[];
+  by_team: NamedValue[];
+  by_priority: NamedValue[];
+  upcoming_jobs: MaintenanceJob[];
+  completed_jobs: MaintenanceJob[];
+  asset_maintenance_due: Array<Record<string, string>>;
+};

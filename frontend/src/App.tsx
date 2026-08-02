@@ -8,6 +8,7 @@ import { DataUpload } from "./pages/DataUpload";
 import { ExecutiveOverview } from "./pages/ExecutiveOverview";
 import { FieldTechnicians } from "./pages/FieldTechnicians";
 import { Incidents } from "./pages/Incidents";
+import { MaintenanceSchedule } from "./pages/MaintenanceSchedule";
 import { NetworkHealth } from "./pages/NetworkHealth";
 import { Recommendations } from "./pages/Recommendations";
 import { RegionPerformance } from "./pages/RegionPerformance";
@@ -26,6 +27,7 @@ const sections = [
   "Region Performance",
   "Recommendations",
   "Asset Management",
+  "Maintenance Schedule",
   "Data Upload",
   "Audit Logs",
   "Report"
@@ -53,6 +55,8 @@ function renderSection(section: Section) {
       return <Recommendations />;
     case "Asset Management":
       return <AssetManagement />;
+    case "Maintenance Schedule":
+      return <MaintenanceSchedule />;
     case "Data Upload":
       return <DataUpload />;
     case "Audit Logs":
