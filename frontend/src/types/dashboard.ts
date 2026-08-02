@@ -160,6 +160,26 @@ export type SlaDrilldownResponse = {
   mttr_trend: NamedValue[];
 };
 
+export type SlaEscalationLevel = {
+  level: string;
+  label: string;
+  count: number;
+  percentage: number;
+};
+
+export type SlaEscalationResponse = {
+  escalation_levels: SlaEscalationLevel[];
+  total_sla_records: number;
+  breached_records: number;
+  breach_rate: number;
+  critical_breaches: Array<Record<string, string | number>>;
+  affected_regions: NamedValue[];
+  affected_services: NamedValue[];
+  avg_mttr_minutes: number;
+  max_mttr_minutes: number;
+  recovery_trend: NamedValue[];
+};
+
 export type TechniciansResponse = {
   technician_workload: NamedValue[];
   dispatch_time: { average_minutes: number };

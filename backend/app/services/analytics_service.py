@@ -472,6 +472,105 @@ def sla_drilldown(filters: AnalyticsFilters | None = None) -> dict[str, object]:
     }
 
 
+SLA_ESCALATION_LEVELS = [
+    ("NONE", "No breach"),
+    ("WARNING", "Minor breach (<2%)"),
+    ("ALERT", "Moderate breach (2-5%)"),
+    ("CRITICAL", "Severe breach (>5%)"),
+]
+
+
+def sla_escalation(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    """Compute SLA breach escalation status and recovery tracking.
+
+    Categorizes SLA breaches by severity, computes escalation status,
+    provides recovery metrics and affected service/region breakdown.
+    """
+    sla_rows = apply_filters(rows("sla_metrics"), filters)
+    breached = [row for row in sla_rows if as_float(row.get("sla_actual")) < as_float(row.get("sla_target"))]
+
+    total_sla_records = len(sla_rows)
+    total_breached = len(breached)
+
+    escalation_counts = {"NONE": 0, "WARNING": 0, "ALERT": 0, "CRITICAL": 0}
+    escalation_detail: dict[str, list[dict[str, object]]] = {
+        "NONE": [],
+        "WARNING": [],
+        "ALERT": [],
+        "CRITICAL": [],
+    }
+
+    for row in sla_rows:
+        target = as_float(row.get("sla_target"))
+        actual = as_float(row.get("sla_actual"))
+        gap_percent = round(abs(target - actual), 3) if target > 0 else 0.0
+
+        if actual >= target:
+            level = "NONE"
+        elif gap_percent < 2.0:
+            level = "WARNING"
+        elif gap_percent < 5.0:
+            level = "ALERT"
+        else:
+            level = "CRITICAL"
+
+        escalation_counts[level] += 1
+        escalation_detail[level].append({
+            "date": row.get("date"),
+            "region": row.get("region"),
+            "service_type": row.get("service_type"),
+            "sla_target": target,
+            "sla_actual": actual,
+            "gap_percent": gap_percent,
+            "mttr_minutes": as_float(row.get("mttr_minutes")),
+        })
+
+    escalation_by_level = [
+        {
+            "level": level,
+            "label": label,
+            "count": escalation_counts[level],
+            "percentage": percent(escalation_counts[level], total_sla_records),
+        }
+        for level, label in SLA_ESCALATION_LEVELS
+    ]
+
+    critical_breaches = escalation_detail["CRITICAL"][:30]
+    affected_regions = sorted(
+        count_by(breached, "region"),
+        key=lambda item: item["value"],
+        reverse=True,
+    )
+    affected_services = sorted(
+        count_by(breached, "service_type"),
+        key=lambda item: item["value"],
+        reverse=True,
+    )
+
+    mttr_stats = []
+    for row in breached:
+        mttr = as_float(row.get("mttr_minutes"))
+        if mttr > 0:
+            mttr_stats.append(mttr)
+    avg_mttr = avg(mttr_stats)
+    max_mttr = max(mttr_stats) if mttr_stats else 0.0
+
+    recovery_trend = avg_by(sla_rows, "month", "mttr_minutes")
+
+    return {
+        "escalation_levels": escalation_by_level,
+        "total_sla_records": total_sla_records,
+        "breached_records": total_breached,
+        "breach_rate": percent(total_breached, total_sla_records),
+        "critical_breaches": critical_breaches,
+        "affected_regions": affected_regions,
+        "affected_services": affected_services,
+        "avg_mttr_minutes": round(avg_mttr, 3),
+        "max_mttr_minutes": round(max_mttr, 3),
+        "recovery_trend": recovery_trend,
+    }
+
+
 def technician_analytics(
     filters: AnalyticsFilters | None = None,
     *,

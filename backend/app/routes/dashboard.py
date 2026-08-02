@@ -13,6 +13,7 @@ from app.services.analytics_service import (
     region_analytics,
     sla_analytics,
     sla_drilldown,
+    sla_escalation,
     technician_analytics,
     technician_assignment,
     technician_drilldown,
@@ -72,6 +73,11 @@ def dashboard_sla(filters: AnalyticsFilters = Depends(build_filters)) -> dict[st
 @router.get("/sla/drilldown")
 def dashboard_sla_drilldown(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(sla_drilldown(filters=filters), filters)
+
+
+@router.get("/sla/escalation")
+def dashboard_sla_escalation(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(sla_escalation(filters=filters), filters)
 
 
 @router.get("/technicians")
