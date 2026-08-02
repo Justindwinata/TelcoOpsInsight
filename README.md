@@ -104,6 +104,19 @@ cd .. && python3 scripts/smoke_toi_0002.py
 - Safe CSV import replacement and persisted import history.
 - Incident, SLA, ticket, and technician drilldowns.
 
+## TOI-0003 Additions
+
+- Incident lifecycle workflow with stage progression tracking (Open → Investigating → Escalated → Resolved → Closed).
+- Technician assignment and workload balancing analytics with capacity metrics and overload detection.
+- SLA breach escalation tracking with severity levels (NONE, WARNING, ALERT, CRITICAL) and recovery indicators.
+- Outage impact analytics across regions, services, and customer segments with impact scoring.
+- Enhanced recommendation engine with priority scoring, confidence levels, and business impact explanation.
+- Operational notification center with categorized alerts and severity-based prioritization.
+- Executive dashboard enhanced with notification strip, data-driven KPI thresholds, and trend indicators.
+- Enterprise UI polish with loading spinners, error/empty state icons, table hover, and responsive design.
+- Backend validation utilities and error handling improvements.
+- Expanded regression tests (82 backend, 18 frontend) covering all new operational workflows.
+
 ## Product Truth
 
 Allowed positioning: synthetic telecom operations dataset, network operations dashboard, service assurance dashboard, local SQLite persistence, CSV upload validation, rule-based recommendations, and decision-support prototype.

@@ -72,6 +72,14 @@ Returns recent incidents, severity summary, monthly incident trend, root cause b
 
 Returns incident drilldown by severity, root cause, region, active region, and critical incident detail.
 
+`GET /api/dashboard/incidents/lifecycle`
+
+Returns incident lifecycle stage progression (Open → Investigating → Escalated → Resolved → Closed), active vs resolved breakdown, oldest active incidents, and severity distribution.
+
+`GET /api/dashboard/incidents/outage-impact`
+
+Returns multi-dimensional outage impact analysis including region impact scoring, service impact scoring, severity breakdown, worst-case region/service identification, and total affected customers.
+
 `GET /api/dashboard/tickets`
 
 Returns ticket volume, backlog, category breakdown, response/resolution summary, customer segment summary, and repeat complaint rate.
@@ -88,6 +96,10 @@ Returns SLA target vs actual, breach count, region/service comparison, and MTTR 
 
 Returns breached SLA detail, breach breakdown by region/service, and MTTR trend.
 
+`GET /api/dashboard/sla/escalation`
+
+Returns SLA breach escalation tracking with severity levels (NONE, WARNING, ALERT, CRITICAL), breach categorization by gap percentage, affected regions/services, average/max MTTR, and recovery trend.
+
 `GET /api/dashboard/technicians`
 
 Returns technician workload, dispatch time, completion time, first-time fix rate, and job status summary.
@@ -96,13 +108,21 @@ Returns technician workload, dispatch time, completion time, first-time fix rate
 
 Returns workload by region/team, first-time fix by priority, and job detail.
 
+`GET /api/dashboard/technicians/assignment`
+
+Returns technician assignment and workload balancing analytics including per-technician capacity metrics, team capacity distribution, overloaded technician detection, and workload imbalance indicators.
+
 `GET /api/dashboard/regions`
 
 Returns region ranking and latest region health metrics.
 
 `GET /api/dashboard/recommendations`
 
-Returns deterministic rule-based operational recommendations.
+Returns deterministic rule-based operational recommendations with priority scoring, confidence levels, business impact explanation, and expected impact analysis.
+
+`GET /api/dashboard/notifications`
+
+Returns categorized operational notifications (incident, SLA, technician, ticket, recommendation) with severity-based prioritization, action links, and severity counts.
 
 ## Reports
 
