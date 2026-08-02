@@ -525,6 +525,115 @@ def technician_drilldown(filters: AnalyticsFilters | None = None) -> dict[str, o
     }
 
 
+def technician_assignment(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    """Compute technician assignment and workload balancing analytics.
+
+    Provides per-technician capacity metrics, assignment status breakdown,
+    team capacity distribution, and workload imbalance indicators.
+    """
+    job_rows = apply_filters(rows("field_technician_jobs"), filters)
+    total_jobs = len(job_rows)
+    active_statuses = {"Open", "In Progress"}
+    completed_statuses = COMPLETED_JOB_STATUSES
+
+    tech_stats: dict[str, dict[str, object]] = {}
+    for row in job_rows:
+        tech_id = str(row.get("technician_id", "Unknown"))
+        team = str(row.get("assigned_team", "Unknown"))
+        status = str(row.get("status", ""))
+        priority = str(row.get("priority", ""))
+        region = str(row.get("region", ""))
+        completion = as_float(row.get("completion_time_minutes"))
+        dispatch = as_float(row.get("dispatch_time_minutes"))
+        first_fix = as_bool(row.get("first_time_fix"))
+
+        if tech_id not in tech_stats:
+            tech_stats[tech_id] = {
+                "technician_id": tech_id,
+                "assigned_team": team,
+                "total_jobs": 0,
+                "active_jobs": 0,
+                "completed_jobs": 0,
+                "total_completion_time": 0.0,
+                "total_dispatch_time": 0.0,
+                "completed_with_time": 0,
+                "first_time_fixes": 0,
+                "critical_jobs": 0,
+                "regions": set(),
+            }
+        ts = tech_stats[tech_id]
+        ts["total_jobs"] = int(ts["total_jobs"]) + 1
+        if status in active_statuses:
+            ts["active_jobs"] = int(ts["active_jobs"]) + 1
+        if status in completed_statuses:
+            ts["completed_jobs"] = int(ts["completed_jobs"]) + 1
+            if completion > 0:
+                ts["total_completion_time"] = float(ts["total_completion_time"]) + completion
+                ts["completed_with_time"] = int(ts["completed_with_time"]) + 1
+            if first_fix:
+                ts["first_time_fixes"] = int(ts["first_time_fixes"]) + 1
+        if dispatch > 0:
+            ts["total_dispatch_time"] = float(ts["total_dispatch_time"]) + dispatch
+        if priority == "Critical":
+            ts["critical_jobs"] = int(ts["critical_jobs"]) + 1
+        ts["regions"].add(region)  # type: ignore[union-attr]
+
+    technicians = []
+    for ts in tech_stats.values():
+        avg_completion = (
+            float(ts["total_completion_time"]) / int(ts["completed_with_time"])
+            if int(ts["completed_with_time"]) > 0
+            else 0.0
+        )
+        avg_dispatch = (
+            float(ts["total_dispatch_time"]) / max(int(ts["total_jobs"]), 1)
+        )
+        technicians.append({
+            "technician_id": ts["technician_id"],
+            "assigned_team": ts["assigned_team"],
+            "total_jobs": ts["total_jobs"],
+            "active_jobs": ts["active_jobs"],
+            "completed_jobs": ts["completed_jobs"],
+            "capacity_ratio": round(int(ts["active_jobs"]) / max(int(ts["total_jobs"]), 1), 3),
+            "avg_completion_minutes": round(avg_completion, 3),
+            "avg_dispatch_minutes": round(avg_dispatch, 3),
+            "first_time_fix_rate": percent(int(ts["first_time_fixes"]), int(ts["completed_jobs"])),
+            "critical_jobs": ts["critical_jobs"],
+            "regions": sorted(ts["regions"]),
+        })
+
+    technicians.sort(key=lambda t: int(t["active_jobs"]), reverse=True)
+
+    team_capacity = defaultdict(lambda: {"total_jobs": 0, "active_jobs": 0, "completed_jobs": 0, "technicians": 0})
+    team_tech_set: dict[str, set[str]] = defaultdict(set)
+    for t in technicians:
+        team = t["assigned_team"]
+        tc = team_capacity[team]
+        tc["total_jobs"] = int(tc["total_jobs"]) + int(t["total_jobs"])
+        tc["active_jobs"] = int(tc["active_jobs"]) + int(t["active_jobs"])
+        tc["completed_jobs"] = int(tc["completed_jobs"]) + int(t["completed_jobs"])
+        team_tech_set[team].add(t["technician_id"])
+    team_list = []
+    for team_name, tc in sorted(team_capacity.items()):
+        tc["technicians"] = len(team_tech_set[team_name])
+        tc["avg_jobs_per_technician"] = round(int(tc["total_jobs"]) / max(int(tc["technicians"]), 1), 3)
+        team_list.append(tc)
+
+    overloaded = [t for t in technicians if int(t["active_jobs"]) > int(t["total_jobs"]) * 0.6]
+    understaffed_teams = [tc for tc in team_list if int(tc["active_jobs"]) > int(tc["total_jobs"]) * 0.5]
+
+    return {
+        "technicians": technicians,
+        "team_capacity": team_list,
+        "total_technicians": len(technicians),
+        "total_jobs": total_jobs,
+        "active_jobs": sum(1 for row in job_rows if str(row.get("status", "")) in active_statuses),
+        "completed_jobs": sum(1 for row in job_rows if str(row.get("status", "")) in completed_statuses),
+        "overloaded_technicians": overloaded,
+        "understaffed_teams": understaffed_teams,
+    }
+
+
 def region_analytics(
     filters: AnalyticsFilters | None = None,
     *,

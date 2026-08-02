@@ -175,6 +175,39 @@ export type TechnicianDrilldownResponse = {
   workload_detail: Array<Record<string, string>>;
 };
 
+export type TechnicianAssignmentItem = {
+  technician_id: string;
+  assigned_team: string;
+  total_jobs: number;
+  active_jobs: number;
+  completed_jobs: number;
+  capacity_ratio: number;
+  avg_completion_minutes: number;
+  avg_dispatch_minutes: number;
+  first_time_fix_rate: number;
+  critical_jobs: number;
+  regions: string[];
+};
+
+export type TechnicianTeamCapacity = {
+  total_jobs: number;
+  active_jobs: number;
+  completed_jobs: number;
+  technicians: number;
+  avg_jobs_per_technician: number;
+};
+
+export type TechnicianAssignmentResponse = {
+  technicians: TechnicianAssignmentItem[];
+  team_capacity: TechnicianTeamCapacity[];
+  total_technicians: number;
+  total_jobs: number;
+  active_jobs: number;
+  completed_jobs: number;
+  overloaded_technicians: TechnicianAssignmentItem[];
+  understaffed_teams: TechnicianTeamCapacity[];
+};
+
 export type RegionMetric = {
   date: string;
   region: string;

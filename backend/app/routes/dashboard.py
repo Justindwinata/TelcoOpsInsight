@@ -14,6 +14,7 @@ from app.services.analytics_service import (
     sla_analytics,
     sla_drilldown,
     technician_analytics,
+    technician_assignment,
     technician_drilldown,
     ticket_drilldown,
     ticket_analytics,
@@ -81,6 +82,11 @@ def dashboard_technicians(filters: AnalyticsFilters = Depends(build_filters)) ->
 @router.get("/technicians/drilldown")
 def dashboard_technicians_drilldown(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(technician_drilldown(filters=filters), filters)
+
+
+@router.get("/technicians/assignment")
+def dashboard_technicians_assignment(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(technician_assignment(filters=filters), filters)
 
 
 @router.get("/regions")
