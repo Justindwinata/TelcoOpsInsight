@@ -21,6 +21,7 @@ from app.services.analytics_service import (
     ticket_drilldown,
     ticket_analytics,
 )
+from app.services.notification_service import generate_notifications
 from app.services.recommendation_service import rule_based_recommendations
 
 
@@ -109,3 +110,8 @@ def dashboard_regions(filters: AnalyticsFilters = Depends(build_filters)) -> dic
 @router.get("/recommendations")
 def dashboard_recommendations(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(rule_based_recommendations(filters=filters), filters)
+
+
+@router.get("/notifications")
+def dashboard_notifications(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(generate_notifications(filters=filters), filters)

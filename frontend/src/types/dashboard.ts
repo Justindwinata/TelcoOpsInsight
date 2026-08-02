@@ -59,6 +59,30 @@ export type RecommendationsResponse = {
   triggered_count: number;
   rules_evaluated: number;
   method: string;
+  scoring?: {
+    model: string;
+    description: string;
+  };
+};
+
+export type Notification = {
+  id: string;
+  category: string;
+  severity: string;
+  title: string;
+  message: string;
+  count: number;
+  action_url: string;
+  action_label: string;
+};
+
+export type NotificationsResponse = {
+  notifications: Notification[];
+  total_count: number;
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  categories: string[];
 };
 
 export type Incident = {
