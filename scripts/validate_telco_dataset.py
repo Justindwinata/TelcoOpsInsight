@@ -52,6 +52,9 @@ TICKET_CATEGORIES = {
 }
 JOB_STATUSES = {"Open", "In Progress", "Resolved", "Closed"}
 BOOLEAN_VALUES = {"true", "false", "True", "False", True, False}
+ASSET_TYPES = {"BTS", "OLT", "ODP", "Router", "Switch", "Transmission"}
+ASSET_STATUSES = {"Active", "Maintenance", "Faulty", "Decommissioned"}
+OWNERSHIP_TYPES = {"NusaTel Owned", "Leased", "Customer Premises", "Partner"}
 
 
 REQUIRED_COLUMNS = {
@@ -171,6 +174,22 @@ REQUIRED_COLUMNS = {
         "recommendation_text",
         "recommended_owner",
     ],
+    "network_assets.csv": [
+        "asset_id",
+        "asset_type",
+        "asset_name",
+        "site_id",
+        "region",
+        "vendor",
+        "model",
+        "status",
+        "ownership",
+        "capacity",
+        "install_date",
+        "warranty_until",
+        "last_maintenance",
+        "next_maintenance",
+    ],
 }
 
 ROW_RANGES = {
@@ -182,6 +201,7 @@ ROW_RANGES = {
     "region_performance.csv": (365, 1500),
     "service_quality_metrics.csv": (1000, 3000),
     "recommendation_rules.csv": (30, 80),
+    "network_assets.csv": (500, 4000),
 }
 
 
@@ -451,6 +471,23 @@ def validate_rules(rows: list[dict[str, str]], _: dict[str, set[str]]) -> Valida
     return ValidationResult("recommendation_rules", len(rows), not errors, errors, warnings)
 
 
+def validate_network_assets(rows: list[dict[str, str]], _: dict[str, set[str]]) -> ValidationResult:
+    errors: list[str] = []
+    warnings: list[str] = []
+    check_columns("network_assets.csv", rows, errors)
+    check_row_count("network_assets.csv", rows, errors)
+    check_unique(rows, "asset_id", errors)
+    for index, row in enumerate(rows, start=2):
+        prefix = f"network_assets.csv:{index}"
+        ensure(row.get("asset_type") in ASSET_TYPES, f"{prefix}.asset_type invalid: {row.get('asset_type')}", errors)
+        ensure(row.get("status") in ASSET_STATUSES, f"{prefix}.status invalid: {row.get('status')}", errors)
+        ensure(row.get("ownership") in OWNERSHIP_TYPES, f"{prefix}.ownership invalid: {row.get('ownership')}", errors)
+        ensure(row.get("region") in REGIONS, f"{prefix}.region invalid: {row.get('region')}", errors)
+        for field in ["asset_id", "asset_name", "site_id", "vendor", "model", "capacity"]:
+            ensure(row.get(field, "") != "", f"{prefix}.{field} is empty", errors)
+    return ValidationResult("network_assets", len(rows), not errors, errors, warnings)
+
+
 VALIDATORS: dict[str, Callable[[list[dict[str, str]], dict[str, set[str]]], ValidationResult]] = {
     "network_sites.csv": validate_network_sites,
     "network_incidents.csv": validate_network_incidents,
@@ -460,6 +497,7 @@ VALIDATORS: dict[str, Callable[[list[dict[str, str]], dict[str, set[str]]], Vali
     "region_performance.csv": validate_region_performance,
     "service_quality_metrics.csv": validate_quality,
     "recommendation_rules.csv": validate_rules,
+    "network_assets.csv": validate_network_assets,
 }
 
 

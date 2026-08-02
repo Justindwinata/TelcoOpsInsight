@@ -429,6 +429,61 @@ def build_rules() -> list[dict[str, object]]:
     return rows
 
 
+def build_network_assets(rng: random.Random, sites: list[dict[str, object]]) -> list[dict[str, object]]:
+    """Build network asset inventory: BTS, OLT, ODP, Router, Switch, Transmission."""
+    rows: list[dict[str, object]] = []
+    asset_types = ["BTS", "OLT", "ODP", "Router", "Switch", "Transmission"]
+    vendors = ["Nokia", "Huawei", "Ericsson", "Cisco", "Juniper", "ZTE"]
+    ownership_options = ["NusaTel Owned", "Leased", "Customer Premises", "Partner"]
+
+    asset_id_counter = 1
+    for site in sites:
+        # Each site has multiple assets
+        for asset_type in asset_types:
+            count = rng.randint(1, 4)
+            for _ in range(count):
+                asset_id = f"AST-{asset_id_counter:05d}"
+                asset_id_counter += 1
+                status = weighted_choice(
+                    rng,
+                    [("Active", 0.82), ("Maintenance", 0.10), ("Faulty", 0.05), ("Decommissioned", 0.03)],
+                )
+                vendor = rng.choice(vendors)
+                ownership = weighted_choice(
+                    rng,
+                    [("NusaTel Owned", 0.70), ("Leased", 0.15), ("Customer Premises", 0.10), ("Partner", 0.05)],
+                )
+                capacity = {
+                    "BTS": "100 MHz",
+                    "OLT": "10 Gbps",
+                    "ODP": "1 Gbps",
+                    "Router": "40 Gbps",
+                    "Switch": "10 Gbps",
+                    "Transmission": "100 Gbps",
+                }.get(asset_type, "1 Gbps")
+                install_date = START_DATE - timedelta(days=rng.randint(30, 3000))
+                warranty_until = install_date + timedelta(days=365 * rng.randint(2, 7))
+                rows.append(
+                    {
+                        "asset_id": asset_id,
+                        "asset_type": asset_type,
+                        "asset_name": f"{site['region'][:3].upper()}-{asset_type}-{asset_id_counter:03d}",
+                        "site_id": site["site_id"],
+                        "region": site["region"],
+                        "vendor": vendor,
+                        "model": f"{vendor[:3].upper()}-{asset_type}-{rng.randint(1000, 9999)}",
+                        "status": status,
+                        "ownership": ownership,
+                        "capacity": capacity,
+                        "install_date": install_date.isoformat(),
+                        "warranty_until": warranty_until.isoformat(),
+                        "last_maintenance": (START_DATE - timedelta(days=rng.randint(1, 180))).isoformat(),
+                        "next_maintenance": (START_DATE + timedelta(days=rng.randint(1, 365))).isoformat(),
+                    }
+                )
+    return rows
+
+
 def main() -> None:
     rng = random.Random(SEED)
     sites = build_sites(rng)
@@ -439,6 +494,7 @@ def main() -> None:
     region_performance = build_region_performance(rng, sites, incidents, tickets)
     quality = build_quality(rng, sites)
     rules = build_rules()
+    assets = build_network_assets(rng, sites)
 
     specs = {
         "network_sites.csv": (sites, list(sites[0].keys())),
@@ -449,6 +505,7 @@ def main() -> None:
         "region_performance.csv": (region_performance, list(region_performance[0].keys())),
         "service_quality_metrics.csv": (quality, list(quality[0].keys())),
         "recommendation_rules.csv": (rules, list(rules[0].keys())),
+        "network_assets.csv": (assets, list(assets[0].keys())),
     }
 
     for name, (rows, columns) in specs.items():

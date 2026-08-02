@@ -364,3 +364,25 @@ export type AuditLogsResponse = {
   audit_logs: AuditLogEntry[];
   count: number;
 };
+
+export type AssetInventoryResponse = {
+  total_assets: number;
+  asset_types: NamedValue[];
+  asset_statuses: NamedValue[];
+  ownership: NamedValue[];
+  region_distribution: NamedValue[];
+  active_count: number;
+  faulty_count: number;
+  maintenance_count: number;
+  faulty_assets: Array<Record<string, string | number>>;
+  status_breakdown: Record<string, number>;
+  type_breakdown: Record<string, number>;
+  warranty_expiring: Array<Record<string, string>>;
+  due_maintenance: Array<Record<string, string>>;
+  health_score: number;
+};
+
+export type AssetDetailResponse = {
+  assets: Array<Record<string, string>>;
+  total: number;
+};

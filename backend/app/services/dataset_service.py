@@ -30,6 +30,7 @@ CSV_TO_TABLE = {
     "region_performance.csv": "region_performance",
     "service_quality_metrics.csv": "service_quality_metrics",
     "recommendation_rules.csv": "recommendation_rules",
+    "network_assets.csv": "network_assets",
 }
 DATASET_TYPE_TO_FILE = {table_name: file_name for file_name, table_name in CSV_TO_TABLE.items()}
 

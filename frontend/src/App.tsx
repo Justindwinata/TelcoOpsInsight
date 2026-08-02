@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { FilterPanel } from "./components/FilterPanel";
 import { FilterProvider } from "./filters/FilterContext";
+import { AssetManagement } from "./pages/AssetManagement";
 import { AuditLogs } from "./pages/AuditLogs";
 import { DataUpload } from "./pages/DataUpload";
 import { ExecutiveOverview } from "./pages/ExecutiveOverview";
@@ -24,6 +25,7 @@ const sections = [
   "Field Technician Dispatch",
   "Region Performance",
   "Recommendations",
+  "Asset Management",
   "Data Upload",
   "Audit Logs",
   "Report"
@@ -49,6 +51,8 @@ function renderSection(section: Section) {
       return <RegionPerformance />;
     case "Recommendations":
       return <Recommendations />;
+    case "Asset Management":
+      return <AssetManagement />;
     case "Data Upload":
       return <DataUpload />;
     case "Audit Logs":

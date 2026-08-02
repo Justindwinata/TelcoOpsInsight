@@ -36,7 +36,8 @@
     "field_technician_jobs.csv": 1800,
     "region_performance.csv": 530,
     "service_quality_metrics.csv": 2650,
-    "recommendation_rules.csv": 44
+    "recommendation_rules.csv": 44,
+    "network_assets.csv": 3750
   },
   "disclaimer": "Synthetic demo data only. No real telecom operator data or branding is included."
 }
