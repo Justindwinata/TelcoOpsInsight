@@ -16,13 +16,24 @@ COMPLETED_JOB_STATUSES = {"Resolved", "Closed"}
 
 
 def ensure_seeded() -> None:
-    if not database_has_seed_data():
-        seed_sample_dataset()
+    """Ensure database has seed data before querying.
+    
+    Auto-seeds if missing to prevent query failures.
+    """
+    try:
+        if not database_has_seed_data():
+            seed_sample_dataset()
+    except Exception as exc:
+        raise RuntimeError(f"Failed to ensure seed data: {exc}") from exc
 
 
 def rows(table: str) -> list[dict[str, object]]:
+    """Fetch all rows from a table with error handling."""
     ensure_seeded()
-    return fetch_all(f'SELECT * FROM "{table}"')
+    try:
+        return fetch_all(f'SELECT * FROM "{table}"')
+    except Exception as exc:
+        raise RuntimeError(f"Failed to fetch data from table {table}: {exc}") from exc
 
 
 def as_float(value: object, default: float = 0.0) -> float:
