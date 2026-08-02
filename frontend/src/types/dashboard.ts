@@ -105,6 +105,29 @@ export type IncidentLifecycleResponse = {
   stage_progression: Array<{ stage: string; label: string; description: string }>;
 };
 
+export type OutageImpactItem = {
+  region?: string;
+  service_type?: string;
+  active_incidents: number;
+  affected_customers: number;
+  services_impacted?: number;
+  regions_impacted?: number;
+  impact_score: number;
+};
+
+export type OutageImpactResponse = {
+  total_active_incidents: number;
+  total_affected_customers: number;
+  avg_affected_per_incident: number;
+  severity_breakdown: Record<string, number>;
+  region_impact: OutageImpactItem[];
+  service_impact: OutageImpactItem[];
+  worst_case_region: OutageImpactItem | null;
+  worst_case_service: OutageImpactItem | null;
+  multi_region_incidents: number;
+  multi_service_incidents: number;
+};
+
 export type TicketsResponse = {
   ticket_volume: NamedValue[];
   backlog: number;

@@ -9,6 +9,7 @@ from app.services.analytics_service import (
     incident_drilldown,
     incident_lifecycle,
     network_health,
+    outage_impact,
     overview_metrics,
     region_analytics,
     sla_analytics,
@@ -53,6 +54,11 @@ def dashboard_incidents_drilldown(filters: AnalyticsFilters = Depends(build_filt
 @router.get("/incidents/lifecycle")
 def dashboard_incidents_lifecycle(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(incident_lifecycle(filters=filters), filters)
+
+
+@router.get("/incidents/outage-impact")
+def dashboard_incidents_outage_impact(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(outage_impact(filters=filters), filters)
 
 
 @router.get("/tickets")

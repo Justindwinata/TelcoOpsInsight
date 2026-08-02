@@ -758,3 +758,83 @@ def region_analytics(
         "region_performance_ranking": sorted(ranking, key=lambda item: item["health_score"], reverse=True),
         "region_health_metrics": latest,
     }
+
+
+def outage_impact(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    """Compute outage impact analysis across regions, services, and customer segments.
+
+    Aggregates incident impact data to provide multi-dimensional outage
+    impact visibility for executive decision support.
+    """
+    incident_rows = apply_filters(rows("network_incidents"), filters)
+    active_incidents = [row for row in incident_rows if row.get("status") in ACTIVE_INCIDENT_STATUSES]
+
+    by_region_impact = defaultdict(lambda: {"active_incidents": 0, "affected_customers": 0.0, "services_impacted": set()})
+    by_service_impact = defaultdict(lambda: {"active_incidents": 0, "affected_customers": 0.0, "regions_impacted": set()})
+    severity_impact = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0}
+
+    for incident in active_incidents:
+        region = str(incident.get("region", "Unknown"))
+        service = str(incident.get("service_type", "Unknown"))
+        severity = str(incident.get("severity", "Medium"))
+        affected = as_float(incident.get("affected_customers"))
+
+        by_region_impact[region]["active_incidents"] += 1
+        by_region_impact[region]["affected_customers"] += affected
+        by_region_impact[region]["services_impacted"].add(service)
+
+        by_service_impact[service]["active_incidents"] += 1
+        by_service_impact[service]["affected_customers"] += affected
+        by_service_impact[service]["regions_impacted"].add(region)
+
+        if severity in severity_impact:
+            severity_impact[severity] += 1
+
+    region_impact_list = [
+        {
+            "region": region,
+            "active_incidents": data["active_incidents"],
+            "affected_customers": round(data["affected_customers"], 0),
+            "services_impacted": len(data["services_impacted"]),
+            "impact_score": round(
+                data["active_incidents"] * 10 + data["affected_customers"] * 0.1,
+                3
+            ),
+        }
+        for region, data in by_region_impact.items()
+    ]
+    region_impact_list.sort(key=lambda x: x["impact_score"], reverse=True)
+
+    service_impact_list = [
+        {
+            "service_type": service,
+            "active_incidents": data["active_incidents"],
+            "affected_customers": round(data["affected_customers"], 0),
+            "regions_impacted": len(data["regions_impacted"]),
+            "impact_score": round(
+                data["active_incidents"] * 10 + data["affected_customers"] * 0.1,
+                3
+            ),
+        }
+        for service, data in by_service_impact.items()
+    ]
+    service_impact_list.sort(key=lambda x: x["impact_score"], reverse=True)
+
+    total_affected = sum(as_float(inc.get("affected_customers")) for inc in active_incidents)
+    avg_affected_per_incident = total_affected / len(active_incidents) if active_incidents else 0.0
+
+    worst_case_region = region_impact_list[0] if region_impact_list else None
+    worst_case_service = service_impact_list[0] if service_impact_list else None
+
+    return {
+        "total_active_incidents": len(active_incidents),
+        "total_affected_customers": round(total_affected, 0),
+        "avg_affected_per_incident": round(avg_affected_per_incident, 3),
+        "severity_breakdown": severity_impact,
+        "region_impact": region_impact_list,
+        "service_impact": service_impact_list,
+        "worst_case_region": worst_case_region,
+        "worst_case_service": worst_case_service,
+        "multi_region_incidents": sum(1 for inc in active_incidents if str(inc.get("region")) != "Unknown"),
+        "multi_service_incidents": sum(1 for inc in active_incidents if str(inc.get("service_type")) != "Unknown"),
+    }
