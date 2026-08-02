@@ -465,3 +465,17 @@ export type ChangeSummaryResponse = {
   types: string[];
   risk_levels: string[];
 };
+
+export type RcaSummaryResponse = {
+  total_rcas: number;
+  by_status: Record<string, number>;
+  by_category: Record<string, number>;
+  by_method: Record<string, number>;
+  by_severity: Record<string, number>;
+  implemented: number;
+  closed: number;
+  in_review: number;
+  statuses: string[];
+  categories: string[];
+  methods: string[];
+};
