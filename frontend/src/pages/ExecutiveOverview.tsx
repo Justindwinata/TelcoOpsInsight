@@ -3,7 +3,7 @@ import { KpiCard } from "../components/KpiCard";
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
 import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
-import type { NetworkHealthResponse, OverviewMetrics, RecommendationsResponse } from "../types/dashboard";
+import type { NetworkHealthResponse, NotificationsResponse, OverviewMetrics, RecommendationsResponse } from "../types/dashboard";
 import { integerValue, numberValue, percentageValue } from "../utils/format";
 
 export function ExecutiveOverview() {
@@ -11,16 +11,17 @@ export function ExecutiveOverview() {
   const overview = useApi<OverviewMetrics>(`/api/dashboard/overview${queryString}`);
   const network = useApi<NetworkHealthResponse>(`/api/dashboard/network-health${queryString}`);
   const recommendations = useApi<RecommendationsResponse>(`/api/dashboard/recommendations${queryString}`);
+  const notifications = useApi<NotificationsResponse>(`/api/dashboard/notifications${queryString}`);
 
-  if (overview.loading || network.loading || recommendations.loading) {
+  if (overview.loading || network.loading || recommendations.loading || notifications.loading) {
     return <LoadingState label="Loading operational overview" />;
   }
 
-  if (overview.error || network.error || recommendations.error) {
-    return <ErrorState message={overview.error ?? network.error ?? recommendations.error ?? "Dashboard request failed"} />;
+  if (overview.error || network.error || recommendations.error || notifications.error) {
+    return <ErrorState message={overview.error ?? network.error ?? recommendations.error ?? notifications.error ?? "Dashboard request failed"} />;
   }
 
-  if (!overview.data || !network.data) {
+  if (!overview.data || !network.data || !notifications.data) {
     return <EmptyState />;
   }
 
@@ -29,14 +30,36 @@ export function ExecutiveOverview() {
     { label: "SLA achievement", value: percentageValue(overview.data.sla_achievement), tone: overview.data.sla_achievement < 98 ? ("warning" as const) : ("healthy" as const) },
     { label: "Active incidents", value: integerValue(overview.data.active_incidents), tone: overview.data.critical_incidents > 0 ? ("warning" as const) : ("neutral" as const) },
     { label: "Critical incidents", value: integerValue(overview.data.critical_incidents), tone: overview.data.critical_incidents > 0 ? ("critical" as const) : ("healthy" as const) },
-    { label: "Open tickets", value: integerValue(overview.data.open_ticket_backlog), tone: "warning" as const },
-    { label: "Affected customers", value: integerValue(overview.data.affected_customers), tone: "warning" as const },
-    { label: "Average MTTR", value: `${numberValue(overview.data.average_mttr_minutes, 0)} min`, tone: "neutral" as const },
+    { label: "Open tickets", value: integerValue(overview.data.open_ticket_backlog), tone: overview.data.open_ticket_backlog > 100 ? ("warning" as const) : ("neutral" as const) },
+    { label: "Affected customers", value: integerValue(overview.data.affected_customers), tone: overview.data.affected_customers > 5000 ? ("warning" as const) : ("neutral" as const) },
+    { label: "Average MTTR", value: `${numberValue(overview.data.average_mttr_minutes, 0)} min`, tone: overview.data.average_mttr_minutes > 60 ? ("warning" as const) : ("neutral" as const) },
     { label: "Avg latency", value: `${numberValue(overview.data.average_latency_ms)} ms`, tone: overview.data.average_latency_ms > 55 ? ("warning" as const) : ("healthy" as const) }
   ];
 
   return (
     <div className="grid">
+      <section className="panel notification-strip">
+        <div className="panel-heading">
+          <h3>Operational Notifications</h3>
+          <span className="badge">{integerValue(notifications.data.total_count)} active</span>
+        </div>
+        {notifications.data.total_count > 0 ? (
+          <div className="notification-list">
+            {notifications.data.notifications.slice(0, 5).map((notice) => (
+              <div key={notice.id} className={`notification-item ${notice.severity.toLowerCase()}`}>
+                <span className={`severity ${notice.severity.toLowerCase()}`}>{notice.severity}</span>
+                <div className="notification-body">
+                  <strong>{notice.title}</strong>
+                  <p>{notice.message}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">No active operational notifications. All systems nominal.</p>
+        )}
+      </section>
+
       <section className="kpi-grid">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.label} {...kpi} />
@@ -98,6 +121,14 @@ export function ExecutiveOverview() {
             <div>
               <dt>Customer satisfaction</dt>
               <dd>{numberValue(overview.data.customer_satisfaction, 2)} / 5</dd>
+            </div>
+            <div>
+              <dt>SLA breach count</dt>
+              <dd>{integerValue(overview.data.sla_breach_count)}</dd>
+            </div>
+            <div>
+              <dt>Packet loss rate</dt>
+              <dd>{numberValue(overview.data.packet_loss_rate, 2)}%</dd>
             </div>
           </dl>
         </article>
