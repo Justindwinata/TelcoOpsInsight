@@ -290,6 +290,88 @@ def incident_drilldown(filters: AnalyticsFilters | None = None) -> dict[str, obj
     }
 
 
+INCIDENT_LIFECYCLE_STAGES = [
+    ("Open", "Open", "Initial detection. Awaiting triage and assignment."),
+    ("Investigating", "Assigned", "Assigned to a team. Active investigation underway."),
+    ("Escalated", "In Progress", "Escalated to specialized response. Work in progress."),
+    ("Resolved", "Monitoring", "Root cause addressed. Monitoring service recovery."),
+    ("Closed", "Closed", "Resolution confirmed. Incident closed."),
+]
+
+LIFECYCLE_STAGE_ORDER = {
+    "Open": 0,
+    "Investigating": 1,
+    "Escalated": 2,
+    "Resolved": 3,
+    "Closed": 4,
+}
+
+
+def incident_lifecycle(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    """Compute incident lifecycle stage distribution and progression analytics.
+
+    Maps current incident status to lifecycle stages and computes
+    progression indicators for executive NOC monitoring.
+    """
+    incident_rows = apply_filters(rows("network_incidents"), filters)
+    total = len(incident_rows)
+    by_stage = []
+    for stage_key, stage_label, _description in INCIDENT_LIFECYCLE_STAGES:
+        count = sum(1 for row in incident_rows if str(row.get("status", "")) == stage_key)
+        by_stage.append(
+            {
+                "stage": stage_key,
+                "label": stage_label,
+                "count": count,
+                "percentage": percent(count, total),
+            }
+        )
+
+    active = [row for row in incident_rows if row.get("status") in ACTIVE_INCIDENT_STATUSES]
+    resolved = [row for row in incident_rows if row.get("status") in RESOLVED_INCIDENT_STATUSES]
+
+    avg_duration_active = avg(
+        as_float(row.get("duration_minutes")) for row in active if str(row.get("duration_minutes", "")) not in ("", "0")
+    )
+    avg_duration_resolved = avg(
+        as_float(row.get("duration_minutes")) for row in resolved if str(row.get("duration_minutes", "")) not in ("", "0")
+    )
+
+    severity_active = {}
+    for severity in ["Critical", "High", "Medium", "Low"]:
+        count = sum(1 for row in active if row.get("severity") == severity)
+        severity_active[severity] = count
+
+    oldest_active = sorted(active, key=lambda row: str(row.get("date", "")), reverse=False)[:10]
+
+    return {
+        "lifecycle_stages": by_stage,
+        "total_incidents": total,
+        "active_count": len(active),
+        "resolved_count": len(resolved),
+        "average_duration_active_minutes": round(avg_duration_active, 3),
+        "average_duration_resolved_minutes": round(avg_duration_resolved, 3),
+        "active_severity_breakdown": severity_active,
+        "oldest_active": [
+            {
+                "incident_id": row.get("incident_id"),
+                "date": row.get("date"),
+                "severity": row.get("severity"),
+                "status": row.get("status"),
+                "region": row.get("region"),
+                "service_type": row.get("service_type"),
+                "duration_minutes": row.get("duration_minutes"),
+                "assigned_team": row.get("assigned_team"),
+            }
+            for row in oldest_active
+        ],
+        "stage_progression": [
+            {"stage": stage[0], "label": stage[1], "description": stage[2]}
+            for stage in INCIDENT_LIFECYCLE_STAGES
+        ],
+    }
+
+
 def ticket_analytics(
     filters: AnalyticsFilters | None = None,
     *,

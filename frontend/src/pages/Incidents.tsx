@@ -2,26 +2,94 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Too
 import { EmptyState, ErrorState, LoadingState } from "../components/StateViews";
 import { useDashboardFilters } from "../filters/FilterContext";
 import { useApi } from "../hooks/useApi";
-import type { IncidentDrilldownResponse, IncidentsResponse } from "../types/dashboard";
+import type { IncidentDrilldownResponse, IncidentLifecycleResponse, IncidentsResponse } from "../types/dashboard";
 import { integerValue } from "../utils/format";
 
 export function Incidents() {
   const { queryString } = useDashboardFilters();
   const { data, loading, error } = useApi<IncidentsResponse>(`/api/dashboard/incidents${queryString}`);
   const drilldown = useApi<IncidentDrilldownResponse>(`/api/dashboard/incidents/drilldown${queryString}`);
+  const lifecycle = useApi<IncidentLifecycleResponse>(`/api/dashboard/incidents/lifecycle${queryString}`);
 
-  if (loading) {
+  if (loading || lifecycle.loading) {
     return <LoadingState label="Loading incidents" />;
   }
-  if (error) {
-    return <ErrorState message={error} />;
+  if (error || lifecycle.error) {
+    return <ErrorState message={error || lifecycle.error || "Failed to load incidents"} />;
   }
-  if (!data) {
+  if (!data || !lifecycle.data) {
     return <EmptyState />;
   }
 
   return (
     <div className="grid">
+      <section className="grid two">
+        <article className="panel">
+          <div className="panel-heading">
+            <h3>Incident Lifecycle</h3>
+            <span className="badge">{integerValue(lifecycle.data.total_incidents)} total</span>
+          </div>
+          <div className="lifecycle-stages">
+            {lifecycle.data.lifecycle_stages.map((stage) => (
+              <div key={stage.stage} className="lifecycle-stage">
+                <div className="stage-header">
+                  <strong>{stage.label}</strong>
+                  <span className="stage-count">{integerValue(stage.count)}</span>
+                </div>
+                <div className="stage-bar">
+                  <div className="stage-bar-fill" style={{ width: `${stage.percentage}%` }}></div>
+                </div>
+                <div className="stage-percent">{stage.percentage.toFixed(1)}%</div>
+              </div>
+            ))}
+          </div>
+          <dl className="metric-list">
+            <div>
+              <dt>Active incidents</dt>
+              <dd>{integerValue(lifecycle.data.active_count)}</dd>
+            </div>
+            <div>
+              <dt>Resolved</dt>
+              <dd>{integerValue(lifecycle.data.resolved_count)}</dd>
+            </div>
+            <div>
+              <dt>Avg active duration</dt>
+              <dd>{lifecycle.data.average_duration_active_minutes.toFixed(0)} min</dd>
+            </div>
+            <div>
+              <dt>Avg resolved duration</dt>
+              <dd>{lifecycle.data.average_duration_resolved_minutes.toFixed(0)} min</dd>
+            </div>
+          </dl>
+        </article>
+        <article className="panel">
+          <div className="panel-heading">
+            <h3>Active by Severity</h3>
+          </div>
+          <dl className="metric-list">
+            {Object.entries(lifecycle.data.active_severity_breakdown).map(([severity, count]) => (
+              <div key={severity}>
+                <dt className={severity.toLowerCase()}>{severity}</dt>
+                <dd>{integerValue(count)}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="panel-spacing">
+            <h4>Oldest Active Incidents</h4>
+            {lifecycle.data.oldest_active.length > 0 ? (
+              <ul className="compact-list">
+                {lifecycle.data.oldest_active.slice(0, 5).map((incident, idx) => (
+                  <li key={idx}>
+                    <strong>{incident.incident_id}</strong> - {incident.region} ({incident.status})
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState message="No active incidents" />
+            )}
+          </div>
+        </article>
+      </section>
       <section className="grid three">
         <article className="panel chart-panel">
           <div className="panel-heading">

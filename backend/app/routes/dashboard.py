@@ -7,6 +7,7 @@ from app.filters import AnalyticsFilters, build_filters
 from app.services.analytics_service import (
     incident_analytics,
     incident_drilldown,
+    incident_lifecycle,
     network_health,
     overview_metrics,
     region_analytics,
@@ -45,6 +46,11 @@ def dashboard_incidents(filters: AnalyticsFilters = Depends(build_filters)) -> d
 @router.get("/incidents/drilldown")
 def dashboard_incidents_drilldown(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(incident_drilldown(filters=filters), filters)
+
+
+@router.get("/incidents/lifecycle")
+def dashboard_incidents_lifecycle(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(incident_lifecycle(filters=filters), filters)
 
 
 @router.get("/tickets")

@@ -86,6 +86,25 @@ export type IncidentDrilldownResponse = {
   critical_incidents: Incident[];
 };
 
+export type IncidentLifecycleStage = {
+  stage: string;
+  label: string;
+  count: number;
+  percentage: number;
+};
+
+export type IncidentLifecycleResponse = {
+  lifecycle_stages: IncidentLifecycleStage[];
+  total_incidents: number;
+  active_count: number;
+  resolved_count: number;
+  average_duration_active_minutes: number;
+  average_duration_resolved_minutes: number;
+  active_severity_breakdown: Record<string, number>;
+  oldest_active: Array<Record<string, string | number>>;
+  stage_progression: Array<{ stage: string; label: string; description: string }>;
+};
+
 export type TicketsResponse = {
   ticket_volume: NamedValue[];
   backlog: number;
