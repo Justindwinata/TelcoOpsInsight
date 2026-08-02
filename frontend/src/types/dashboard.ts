@@ -40,6 +40,10 @@ export type Recommendation = {
   explanation: string;
   recommended_action: string;
   recommended_owner: string;
+  priority_score: number;
+  confidence: string;
+  business_impact: string;
+  expected_impact: string;
   region: string;
 };
 
