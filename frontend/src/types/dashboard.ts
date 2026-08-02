@@ -422,3 +422,46 @@ export type MaintenanceResponse = {
   completed_jobs: MaintenanceJob[];
   asset_maintenance_due: Array<Record<string, string>>;
 };
+
+export type ChangeRecord = {
+  change_id: string;
+  title: string;
+  change_type: string;
+  risk_level: string;
+  status: string;
+  region: string;
+  service_type: string;
+  requester: string;
+  approver: string | null;
+  description: string;
+  rollback_plan: string;
+  scheduled_start: string;
+  scheduled_end: string;
+  actual_start: string;
+  actual_end: string;
+  related_incident_id: string;
+  affected_sites: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ChangeSummaryResponse = {
+  total_changes: number;
+  by_status: Record<string, number>;
+  by_type: Record<string, number>;
+  by_risk: Record<string, number>;
+  by_region: Record<string, number>;
+  pending_approval: number;
+  approved: number;
+  in_progress: number;
+  completed: number;
+  rolled_back: number;
+  failed: number;
+  approval_rate: number;
+  rollback_rate: number;
+  failure_rate: number;
+  recent_changes: ChangeRecord[];
+  statuses: string[];
+  types: string[];
+  risk_levels: string[];
+};
