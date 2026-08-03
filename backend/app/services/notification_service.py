@@ -8,7 +8,6 @@ from app.services.analytics_service import (
     ACTIVE_INCIDENT_STATUSES,
     BACKLOG_TICKET_STATUSES,
 )
-from app.services.recommendation_service import rule_based_recommendations
 
 
 NOTIFICATION_CATEGORIES = [
@@ -25,6 +24,7 @@ def generate_notifications(filters: AnalyticsFilters | None = None) -> dict[str,
 
     Aggregates alerts from incidents, SLA, technicians, tickets, and recommendations.
     """
+    from app.services.recommendation_service import rule_based_recommendations
     notifications: list[dict[str, object]] = []
 
     # Incident notifications

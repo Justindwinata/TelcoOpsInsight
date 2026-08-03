@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.filters import AnalyticsFilters
-from app.services.analytics_service import as_float, overview_metrics, region_analytics, rows
+from app.services.analytics_service import overview_metrics, region_analytics, rows
 
 
 def compare(value: float, condition: str, threshold: float) -> bool:
@@ -18,22 +18,10 @@ def compare(value: float, condition: str, threshold: float) -> bool:
     return False
 
 
-def region_from_title(title: str) -> str | None:
-    marker = " in "
-    if marker not in title:
-        return None
-    return title.rsplit(marker, 1)[-1]
-
-
 SEVERITY_BASE_SCORE = {"Critical": 100, "High": 70, "Medium": 40, "Low": 20}
 
 
 def priority_score(severity: str, observed: float, threshold: float) -> float:
-    """Compute a priority score from severity weight plus breach magnitude.
-
-    The severity provides the base score; the gap between observed and
-    threshold adds urgency in proportion to how far the metric diverges.
-    """
     base = SEVERITY_BASE_SCORE.get(severity, 40)
     if threshold == 0:
         gap_factor = 0.5 if observed > 0 else 0.0
@@ -44,7 +32,6 @@ def priority_score(severity: str, observed: float, threshold: float) -> float:
 
 
 def confidence_level(observed: float, threshold: float) -> str:
-    """Estimate confidence that the trigger is a genuine operational issue."""
     if threshold == 0:
         return "High" if observed > 0 else "Medium"
     ratio = observed / abs(threshold)
@@ -56,41 +43,38 @@ def confidence_level(observed: float, threshold: float) -> str:
 
 
 def business_impact_text(metric: str, observed: float, threshold: float, severity: str, affected_region: str, affected_service: str) -> str:
-    """Explain the business impact of a triggered recommendation."""
     delta = abs(observed - threshold)
-    unit = ""
-    if "uptime" in metric or "sla" in metric or "achievement" in metric or "fix" in metric or "utilization" in metric or "satisfaction" in metric:
-        unit = "%"
-    elif "latency" in metric or "mttr" in metric or "time" in metric or "duration" in metric:
-        unit = " units"
-    elif "breach" in metric or "incident" in metric or "ticket" in metric or "backlog" in metric:
-        unit = " counts"
-
+    unit = "%" if "uptime" in metric or "sla" in metric or "achievement" in metric or "fix" in metric or "utilization" in metric or "satisfaction" in metric else " units" if "latency" in metric or "mttr" in metric or "time" in metric or "duration" in metric else " counts"
     severity_tone = {
         "Critical": "immediate executive attention",
         "High": "priority operational response",
         "Medium": "scheduled operational review",
         "Low": "monitoring and observation",
     }.get(severity, "review")
-
-    return (
-        f"Observed {metric} at {round(observed, 2)}{unit} vs {round(threshold, 2)}{unit} "
-        f"across {affected_region}/{affected_service}. Requires {severity_tone}. "
-        f"Current deviation of {round(delta, 2)}{unit} indicates a measurable impact on service delivery."
-    )
+    return f"Observed {metric} at {round(observed, 2)}{unit} vs {round(threshold, 2)}{unit} across {affected_region}/{affected_service}. Requires {severity_tone}. Current deviation of {round(delta, 2)}{unit} indicates a measurable impact on service delivery."
 
 
-def expected_impact_text(metric: str, severity: str, observed: float) -> str:
-    """Describe the expected impact if the recommendation is not acted upon."""
+def technical_impact_text(metric: str, observed: float, threshold: float, affected_region: str) -> str:
+    delta = observed - threshold
     if "uptime" in metric or "sla" in metric:
-        return "Without action, service availability degradation may continue and breach committed SLAs."
-    if "incident" in metric or "backlog" in metric or "ticket" in metric:
-        return "Without action, incident/ticket backlog may grow and delay service restoration."
+        return f"Network availability degradation in {affected_region} may cause service outages affecting SLA commitments."
     if "latency" in metric or "mttr" in metric or "duration" in metric or "time" in metric:
-        return "Without action, response and resolution times may worsen, raising customer dissatisfaction."
+        return f"Increased response/resolution times in {affected_region} degrade user experience and operational efficiency."
     if "packet_loss" in metric or "quality" in metric:
-        return "Without action, service quality may degrade further, increasing churn risk."
-    return "Without action, the observed degradation may persist or worsen."
+        return f"Service quality degradation in {affected_region} increases churn risk and customer complaints."
+    if "incident" in metric or "backlog" in metric or "ticket" in metric:
+        return f"Growing incident/ticket volume in {affected_region} strains NOC capacity and delays resolution."
+    return f"Operational metric {metric} in {affected_region} deviates from target, impacting system stability."
+
+
+def estimated_resolution_priority(metric: str, severity: str) -> str:
+    if severity == "Critical":
+        return "P1 - Resolve within 2 hours"
+    if severity == "High":
+        return "P2 - Resolve within 8 hours"
+    if severity == "Medium":
+        return "P3 - Resolve within 24 hours"
+    return "P4 - Resolve within 72 hours"
 
 
 def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[str, object]:
@@ -103,47 +87,48 @@ def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[
     for rule in rules:
         metric = str(rule.get("metric", ""))
         title = str(rule.get("recommendation_title", ""))
-        threshold = as_float(rule.get("threshold"))
+        threshold = float(rule.get("threshold", 0))
         condition = str(rule.get("condition", ""))
         severity = str(rule.get("severity", "Medium"))
-        target_region = region_from_title(title)
+        target_region = str(title).rsplit(" in ", 1)[-1] if " in " in title else None
         source = regions.get(target_region, {}) if target_region else overview
-        observed = as_float(source.get(metric))
-        if compare(observed, condition, threshold):
-            affected_region = target_region or filters.region if filters and filters.region else target_region or "All Regions"
-            affected_service = filters.service_type if filters and filters.service_type else "All Services"
-            dedupe_key = (metric, str(affected_region), str(rule.get("recommendation_title", "")))
-            if dedupe_key in seen:
-                continue
-            seen.add(dedupe_key)
-            priority = priority_score(severity, observed, threshold)
-            confidence = confidence_level(observed, threshold)
-            recommendations.append(
-                {
-                    "rule_id": rule["rule_id"],
-                    "severity": severity,
-                    "metric": metric,
-                    "condition": condition,
-                    "threshold": threshold,
-                    "observed_value": observed,
-                    "supporting_metric_value": observed,
-                    "trigger_condition": f"{metric} {condition} {threshold}",
-                    "affected_region": affected_region,
-                    "affected_service": affected_service,
-                    "recommendation_title": title,
-                    "recommendation_text": rule["recommendation_text"],
-                    "explanation": f"Observed {metric} is {round(observed, 3)}, which triggered rule {condition} {threshold}.",
-                    "recommended_action": rule["recommendation_text"],
-                    "recommended_owner": rule["recommended_owner"],
-                    "priority_score": priority,
-                    "confidence": confidence,
-                    "business_impact": business_impact_text(
-                        metric, observed, threshold, severity, affected_region, affected_service
-                    ),
-                    "expected_impact": expected_impact_text(metric, severity, observed),
-                    "region": affected_region,
-                }
-            )
+        observed = float(source.get(metric, 0))
+        if not _compare(observed, condition, threshold):
+            continue
+        affected_region = target_region or (filters.region if filters and filters.region else target_region) or "All Regions"
+        affected_service = filters.service_type if filters and filters.service_type else "All Services"
+        dedupe_key = (metric, str(affected_region), title)
+        if dedupe_key in seen:
+            continue
+        seen.add(dedupe_key)
+        priority = priority_score(severity, observed, threshold)
+        confidence = confidence_level(observed, threshold)
+        recommendations.append(
+            {
+                "rule_id": rule["rule_id"],
+                "severity": severity,
+                "metric": metric,
+                "condition": condition,
+                "threshold": threshold,
+                "observed_value": observed,
+                "supporting_metric_value": observed,
+                "trigger_condition": f"{metric} {condition} {threshold}",
+                "affected_region": affected_region,
+                "affected_service": affected_service,
+                "recommendation_title": title,
+                "recommendation_text": rule["recommendation_text"],
+                "explanation": f"Observed {metric} is {round(observed, 3)}, which triggered rule {condition} {threshold}.",
+                "recommended_action": rule["recommendation_text"],
+                "recommended_owner": rule["recommended_owner"],
+                "priority_score": priority,
+                "confidence": confidence,
+                "business_impact": business_impact_text(metric, observed, threshold, severity, affected_region, affected_service),
+                "technical_impact": technical_impact_text(metric, observed, threshold, affected_region),
+                "expected_impact": f"Without action, the observed degradation may persist or worsen.",
+                "resolution_priority": estimated_resolution_priority(metric, severity),
+                "region": affected_region,
+            }
+        )
 
     severity_order = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
     recommendations.sort(
@@ -163,3 +148,17 @@ def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[
             "description": "Priority computed from severity base weight plus magnitude of deviation from threshold.",
         },
     }
+
+
+def _compare(value: float, condition: str, threshold: float) -> bool:
+    if condition == ">":
+        return value > threshold
+    if condition == ">=":
+        return value >= threshold
+    if condition == "<":
+        return value < threshold
+    if condition == "<=":
+        return value <= threshold
+    if condition == "==":
+        return value == threshold
+    return False

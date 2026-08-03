@@ -43,7 +43,9 @@ export type Recommendation = {
   priority_score: number;
   confidence: string;
   business_impact: string;
+  technical_impact: string;
   expected_impact: string;
+  resolution_priority: string;
   region: string;
 };
 
@@ -514,4 +516,19 @@ export type IncidentTimelinesResponse = {
   average_events_per_incident: number;
   timelines: IncidentTimelineEntry[];
   incidents: Array<Record<string, string>>;
+};
+
+export type ExecutiveSummaryResponse = {
+  period: {
+    current: { start: string; end: string; days: number };
+    previous: { start: string; end: string; days: number };
+  };
+  kpi_comparison: Record<string, Record<string, number | Record<string, number>>>;
+  monthly_trend: Record<string, NamedValue[]>;
+  region_comparison: {
+    current_ranking: Array<Record<string, string | number>>;
+    previous_ranking: Array<Record<string, string | number>>;
+  };
+  service_trend: Record<string, Array<Record<string, string | number>>>;
+  summary: { date_range: string; total_days: number; total_incidents: number; total_sla_records: number; total_tickets: number; active_regions: number };
 };
