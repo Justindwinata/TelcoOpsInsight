@@ -23,6 +23,12 @@ from app.services.analytics_service import (
 )
 from app.services.notification_service import generate_notifications
 from app.services.recommendation_service import rule_based_recommendations
+from app.services.advanced_analytics import (
+    predictive_incident_scoring,
+    network_health_index,
+    capacity_utilization,
+    kpi_comparison,
+)
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -115,3 +121,24 @@ def dashboard_recommendations(filters: AnalyticsFilters = Depends(build_filters)
 @router.get("/notifications")
 def dashboard_notifications(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(generate_notifications(filters=filters), filters)
+
+
+@router.get("/predictive/incident-risk")
+def dashboard_incident_risk(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(predictive_incident_scoring(filters=filters), filters)
+
+
+@router.get("/health-index")
+def dashboard_health_index(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(network_health_index(filters=filters), filters)
+
+
+@router.get("/capacity")
+def dashboard_capacity(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(capacity_utilization(filters=filters), filters)
+
+
+@router.get("/kpi-comparison")
+def dashboard_kpi_comparison(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(kpi_comparison(filters=filters), filters)
+
