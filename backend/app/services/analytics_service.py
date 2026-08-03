@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from datetime import date
+from functools import lru_cache
 from typing import Iterable
 
 from app.database import fetch_all
@@ -34,6 +35,11 @@ def rows(table: str) -> list[dict[str, object]]:
         return fetch_all(f'SELECT * FROM "{table}"')
     except Exception as exc:
         raise RuntimeError(f"Failed to fetch data from table {table}: {exc}") from exc
+
+
+def count_by(data: Iterable[dict[str, object]], field: str) -> list[dict[str, object]]:
+    counts = Counter(str(row.get(field, "Unknown")) for row in data)
+    return [{"name": key, "value": value} for key, value in sorted(counts.items())]
 
 
 def as_float(value: object, default: float = 0.0) -> float:
