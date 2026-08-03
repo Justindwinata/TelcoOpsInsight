@@ -8,6 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import BinaryIO
+from hashlib import md5
 
 from app.config import settings
 from app.database import get_connection
@@ -39,9 +40,44 @@ def table_for_file(file_name: str) -> str:
     return CSV_TO_TABLE[file_name]
 
 
-def load_csv(path: Path) -> list[dict[str, str]]:
-    with path.open(newline="", encoding="utf-8") as handle:
-        return list(csv.DictReader(handle))
+def compute_row_hash(row: dict[str, str]) -> str:
+    """Compute MD5 hash of row for duplicate detection."""
+    row_str = json.dumps(row, sort_keys=True, ensure_ascii=True)
+    return md5(row_str.encode()).hexdigest()
+
+
+def detect_duplicate_rows(rows: list[dict[str, str]]) -> tuple[list[dict[str, str]], int]:
+    """Filter out duplicate rows, returning unique rows and duplicate count."""
+    seen_hashes = set()
+    unique_rows = []
+    duplicate_count = 0
+    for row in rows:
+        row_hash = compute_row_hash(row)
+        if row_hash not in seen_hashes:
+            seen_hashes.add(row_hash)
+            unique_rows.append(row)
+        else:
+            duplicate_count += 1
+    return unique_rows, duplicate_count
+
+
+def preview_dataset(rows: list[dict[str, str]], limit: int = 5) -> dict[str, object]:
+    """Generate preview summary of dataset."""
+    if not rows:
+        return {
+            "row_count": 0,
+            "columns": [],
+            "preview_rows": [],
+            "sample_columns": [],
+        }
+    columns = list(rows[0].keys())
+    return {
+        "row_count": len(rows),
+        "columns": columns,
+        "column_count": len(columns),
+        "preview_rows": rows[:limit],
+        "sample_columns": columns[:5],
+    }
 
 
 def create_table(connection: sqlite3.Connection, table_name: str, columns: list[str]) -> None:
