@@ -35,6 +35,7 @@ from app.services.trend_service import incident_trend_analysis
 from app.services.ranking_service import regional_performance_ranking
 from app.services.tech_performance_service import technician_performance_scoring
 from app.services.operational_timeline_service import operational_timeline
+from app.services.simulation_service import simulate_kpi_changes
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -177,3 +178,26 @@ def dashboard_tech_ranking(filters: AnalyticsFilters = Depends(build_filters)) -
 @router.get("/operational-timeline")
 def dashboard_operational_timeline(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(operational_timeline(filters=filters), filters)
+
+
+@router.get("/what-if")
+def dashboard_what_if_simulation(
+    filters: AnalyticsFilters = Depends(build_filters),
+    technician_change: int | None = None,
+    response_time_change_pct: float | None = None,
+    sla_target_change: float | None = None,
+    ticket_reduction_pct: float | None = None,
+    replace_faulty_assets: bool | None = None,
+) -> dict[str, object]:
+    params = {}
+    if technician_change is not None:
+        params["technician_change"] = technician_change
+    if response_time_change_pct is not None:
+        params["response_time_change_pct"] = response_time_change_pct
+    if sla_target_change is not None:
+        params["sla_target_change"] = sla_target_change
+    if ticket_reduction_pct is not None:
+        params["ticket_reduction_pct"] = ticket_reduction_pct
+    if replace_faulty_assets is not None:
+        params["replace_faulty_assets"] = replace_faulty_assets
+    return with_filter_metadata(simulate_kpi_changes(params=params, filters=filters), filters)
