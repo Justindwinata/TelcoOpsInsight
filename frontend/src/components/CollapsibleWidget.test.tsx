@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { CollapsibleWidget } from "./CollapsibleWidget";
 
@@ -36,7 +36,7 @@ describe("CollapsibleWidget", () => {
   });
 
   it("calls onToggle callback", () => {
-    const onToggle = vitest.fn();
+    const onToggle = vi.fn();
     render(
       <CollapsibleWidget title="Test Widget" defaultExpanded={true} onToggle={onToggle}>
         <p>Content</p>

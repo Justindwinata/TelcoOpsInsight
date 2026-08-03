@@ -76,7 +76,7 @@ export function LineChartEnhanced({ data, title, color = "#0f88a8", height = 260
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e4ebf2" />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-          <YAxis domain={yDomain || "auto"} tick={{ fontSize: 11 }} />
+          <YAxis domain={yDomain ?? undefined} tick={{ fontSize: 11 }} />
           <Tooltip content={<CustomTooltip />} />
           <Line type="monotone" dataKey="value" stroke={color} strokeWidth={3} dot={showDots} />
         </LineChart>
