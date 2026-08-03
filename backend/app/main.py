@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.error_handlers import register_error_handlers
-from app.routes import audit, assets, auth, changes, dashboard, datasets, health, maintenance, rca, reports
+from app.routes import audit, assets, auth, changes, dashboard, datasets, health, maintenance, rca, reports, timeline
 
 
 def create_app() -> FastAPI:
@@ -32,6 +32,7 @@ def create_app() -> FastAPI:
     app.include_router(changes.router)
     app.include_router(rca.router)
     app.include_router(reports.router)
+    app.include_router(timeline.router)
     return app
 
 

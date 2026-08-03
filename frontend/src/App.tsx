@@ -15,6 +15,7 @@ import { Recommendations } from "./pages/Recommendations";
 import { RegionPerformance } from "./pages/RegionPerformance";
 import { Report } from "./pages/Report";
 import { RootCauseAnalysis } from "./pages/RootCauseAnalysis";
+import { IncidentTimeline } from "./pages/IncidentTimeline";
 import { SlaAssurance } from "./pages/SlaAssurance";
 import { Tickets } from "./pages/Tickets";
 import { Login } from "./pages/Login";
@@ -32,6 +33,7 @@ const sections = [
   "Maintenance Schedule",
   "Change Management",
   "Root Cause Analysis",
+  "Incident Timeline",
   "Data Upload",
   "Audit Logs",
   "Report"
@@ -65,6 +67,8 @@ function renderSection(section: Section) {
       return <ChangeManagement />;
     case "Root Cause Analysis":
       return <RootCauseAnalysis />;
+    case "Incident Timeline":
+      return <IncidentTimeline />;
     case "Data Upload":
       return <DataUpload />;
     case "Audit Logs":

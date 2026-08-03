@@ -479,3 +479,39 @@ export type RcaSummaryResponse = {
   categories: string[];
   methods: string[];
 };
+
+export type TimelineEvent = {
+  timestamp: string;
+  event: string;
+  title: string;
+  detail: string;
+  actor: string;
+};
+
+export type IncidentTimelineEntry = {
+  incident_id: string;
+  date: string;
+  severity: string;
+  status: string;
+  region: string;
+  service_type: string;
+  assigned_team: string;
+  escalation_level: string;
+  root_cause: string;
+  affected_customers: string;
+  duration_minutes: string;
+  start_time: string;
+  resolved_time: string;
+  event_count: number;
+  events: TimelineEvent[];
+};
+
+export type IncidentTimelinesResponse = {
+  total_incidents: number;
+  with_escalation: number;
+  resolved: number;
+  closed: number;
+  average_events_per_incident: number;
+  timelines: IncidentTimelineEntry[];
+  incidents: Array<Record<string, string>>;
+};
