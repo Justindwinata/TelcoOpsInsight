@@ -19,10 +19,14 @@ import { IncidentTimeline } from "./pages/IncidentTimeline";
 import { SlaAssurance } from "./pages/SlaAssurance";
 import { Tickets } from "./pages/Tickets";
 import { Login } from "./pages/Login";
+import { NetworkHealthIndex, CapacityUtilization, KpiComparison } from "./pages/AdvancedAnalytics";
 
 const sections = [
   "Executive Overview",
   "Network Health",
+  "Network Health Index",
+  "Capacity Utilization",
+  "KPI Comparison",
   "Incident Monitoring",
   "SLA Assurance",
   "Customer Tickets",
@@ -47,6 +51,12 @@ function renderSection(section: Section) {
       return <ExecutiveOverview />;
     case "Network Health":
       return <NetworkHealth />;
+    case "Network Health Index":
+      return <NetworkHealthIndex />;
+    case "Capacity Utilization":
+      return <CapacityUtilization />;
+    case "KPI Comparison":
+      return <KpiComparison />;
     case "Incident Monitoring":
       return <Incidents />;
     case "SLA Assurance":
