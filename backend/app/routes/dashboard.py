@@ -34,6 +34,7 @@ from app.services.brief_service import generate_executive_brief
 from app.services.trend_service import incident_trend_analysis
 from app.services.ranking_service import regional_performance_ranking
 from app.services.tech_performance_service import technician_performance_scoring
+from app.services.operational_timeline_service import operational_timeline
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -171,3 +172,8 @@ def dashboard_region_ranking(filters: AnalyticsFilters = Depends(build_filters))
 @router.get("/ranking/technicians")
 def dashboard_tech_ranking(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(technician_performance_scoring(filters=filters), filters)
+
+
+@router.get("/operational-timeline")
+def dashboard_operational_timeline(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(operational_timeline(filters=filters), filters)
