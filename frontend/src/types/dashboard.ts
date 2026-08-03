@@ -532,3 +532,122 @@ export type ExecutiveSummaryResponse = {
   service_trend: Record<string, Array<Record<string, string | number>>>;
   summary: { date_range: string; total_days: number; total_incidents: number; total_sla_records: number; total_tickets: number; active_regions: number };
 };
+
+export type RiskScoreItem = {
+  region: string;
+  service_type: string;
+  risk_score: number;
+  risk_level: string;
+  curr_incidents: number;
+  prev_incidents: number;
+  incident_trend: number;
+  curr_critical: number;
+  sla_trend: number;
+  curr_tickets: number;
+  prev_tickets: number;
+  recurring_issues: number;
+  contributing_factors: string[];
+};
+
+export type RiskScoringResponse = {
+  risk_scores: RiskScoreItem[];
+  summary: {
+    total_combinations: number;
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    period: {
+      current: { start: string; end: string };
+      previous: { start: string; end: string };
+    };
+    methodology: Record<string, number>;
+  };
+};
+
+export type HealthComponent = {
+  score: number;
+  weight: number;
+  description: string;
+  mttr_score?: number;
+  incident_score?: number;
+  latency_score?: number;
+  packet_loss_score?: number;
+};
+
+export type HealthIndexResponse = {
+  network_health_index: number;
+  health_level: string;
+  components: {
+    availability: HealthComponent;
+    reliability: HealthComponent;
+    performance: HealthComponent;
+    capacity: HealthComponent;
+  };
+  metadata: {
+    period_days: number;
+    active_incidents: number;
+    avg_mttr_minutes: number;
+    avg_latency_ms: number;
+    avg_packet_loss_pct: number;
+  };
+};
+
+export type CapacityServiceItem = {
+  service_type: string;
+  avg_latency_ms: number;
+  avg_packet_loss_pct: number;
+  avg_quality_score: number;
+  avg_utilization_pct: number;
+  avg_bandwidth_gbps: number;
+  congestion_level: string;
+  headroom_pct: number;
+};
+
+export type CapacityRegionItem = {
+  region: string;
+  avg_latency_ms: number;
+  avg_packet_loss_pct: number;
+  avg_quality_score: number;
+  avg_utilization_pct: number;
+  avg_bandwidth_gbps: number;
+  congestion_level: string;
+  headroom_pct: number;
+};
+
+export type CapacityTrendItem = {
+  month: string;
+  avg_latency_ms: number;
+  avg_utilization_pct: number;
+  avg_packet_loss_pct: number;
+};
+
+export type CapacityResponse = {
+  by_service: CapacityServiceItem[];
+  by_region: CapacityRegionItem[];
+  monthly_trend: CapacityTrendItem[];
+  summary: {
+    services_at_critical: number;
+    services_at_high: number;
+    regions_at_critical: number;
+    regions_at_high: number;
+    overall_avg_utilization: number;
+  };
+};
+
+export type KpiPeriodComparison = {
+  period: { start: string; end: string };
+  current: Record<string, number>;
+  previous: Record<string, number>;
+  delta_pct: Record<string, number>;
+};
+
+export type KpiComparisonResponse = {
+  comparison: {
+    Week: KpiPeriodComparison;
+    Month: KpiPeriodComparison;
+    Quarter: KpiPeriodComparison;
+    Year: KpiPeriodComparison;
+  };
+  as_of: string;
+};
