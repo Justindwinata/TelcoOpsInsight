@@ -29,6 +29,7 @@ from app.services.advanced_analytics import (
     capacity_utilization,
     kpi_comparison,
 )
+from app.services.intelligence_service import generate_operational_insights
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -141,4 +142,9 @@ def dashboard_capacity(filters: AnalyticsFilters = Depends(build_filters)) -> di
 @router.get("/kpi-comparison")
 def dashboard_kpi_comparison(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(kpi_comparison(filters=filters), filters)
+
+
+@router.get("/intelligence")
+def dashboard_intelligence(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(generate_operational_insights(filters=filters), filters)
 
