@@ -1,8 +1,19 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
+from collections import defaultdict
+
 from app.filters import AnalyticsFilters
 from app.services.analytics_service import as_float, overview_metrics, region_analytics, rows
-from collections import defaultdict
+
+
+SEVERITY_BASE_SCORE = {"Critical": 100, "High": 70, "Medium": 40, "Low": 20}
+URGENCY_WINDOWS = {
+    "Critical": {"min_hours": 1, "max_hours": 4, "default_hours": 2},
+    "High": {"min_hours": 4, "max_hours": 12, "default_hours": 8},
+    "Medium": {"min_hours": 12, "max_hours": 48, "default_hours": 24},
+    "Low": {"min_hours": 24, "max_hours": 168, "default_hours": 72},
+}
 
 
 def compare(value: float, condition: str, threshold: float) -> bool:
@@ -17,9 +28,6 @@ def compare(value: float, condition: str, threshold: float) -> bool:
     if condition == "==":
         return value == threshold
     return False
-
-
-SEVERITY_BASE_SCORE = {"Critical": 100, "High": 70, "Medium": 40, "Low": 20}
 
 
 def priority_score(severity: str, observed: float, threshold: float) -> float:
@@ -76,6 +84,65 @@ def estimated_resolution_priority(metric: str, severity: str) -> str:
     if severity == "Medium":
         return "P3 - Resolve within 24 hours"
     return "P4 - Resolve within 72 hours"
+
+
+def estimated_urgency_window(severity: str, observed: float, threshold: float) -> dict[str, object]:
+    """Calculate urgency window based on severity and deviation magnitude."""
+    window = URGENCY_WINDOWS.get(severity, URGENCY_WINDOWS["Medium"])
+    base_hours = window["default_hours"]
+    
+    if threshold != 0:
+        deviation_ratio = abs(observed - threshold) / abs(threshold)
+        if deviation_ratio > 2.0:
+            adjusted_hours = window["min_hours"]
+        elif deviation_ratio > 1.5:
+            adjusted_hours = base_hours * 0.5
+        elif deviation_ratio > 1.0:
+            adjusted_hours = base_hours * 0.75
+        else:
+            adjusted_hours = base_hours
+    else:
+        adjusted_hours = base_hours
+    
+    deadline = datetime.utcnow() + timedelta(hours=adjusted_hours)
+    
+    return {
+        "urgency_level": "Immediate" if adjusted_hours <= 4 else "High" if adjusted_hours <= 24 else "Medium" if adjusted_hours <= 72 else "Low",
+        "recommended_hours": round(adjusted_hours, 1),
+        "deadline": deadline.strftime("%Y-%m-%d %H:%M UTC"),
+    }
+
+
+def actionability_score(metric: str, severity: str, has_owner: bool, has_region: bool) -> dict[str, object]:
+    """Score how actionable a recommendation is."""
+    score = 0
+    factors = []
+    
+    if has_owner:
+        score += 40
+        factors.append("Owner assigned")
+    else:
+        factors.append("No owner assigned")
+    
+    if has_region:
+        score += 30
+        factors.append("Region identified")
+    else:
+        factors.append("Region unknown")
+    
+    if severity in ("Critical", "High"):
+        score += 20
+        factors.append("High priority")
+    
+    if metric in ("network_uptime", "sla_achievement", "avg_latency"):
+        score += 10
+        factors.append("Clear metric")
+    
+    return {
+        "score": min(100, score),
+        "factors": factors,
+        "actionability": "High" if score >= 70 else "Medium" if score >= 40 else "Low",
+    }
 
 
 def estimated_completion_hours(severity: str, observed: float, threshold: float) -> float:
@@ -181,6 +248,8 @@ def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[
                 "estimated_completion_hours": estimated_completion_hours(severity, observed, threshold),
                 "completion_time_label": completion_time_label(estimated_completion_hours(severity, observed, threshold)),
                 "owner_assignment": enhanced_owner_assignment(rule["recommended_owner"], severity, affected_region),
+                "urgency_window": estimated_urgency_window(severity, observed, threshold),
+                "actionability": actionability_score(metric, severity, bool(rule.get("recommended_owner")), bool(target_region)),
                 "region": affected_region,
             }
         )
