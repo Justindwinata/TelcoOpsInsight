@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from app.filters import AnalyticsFilters
-from app.services.analytics_service import overview_metrics, region_analytics, rows
+from app.services.analytics_service import as_float, overview_metrics, region_analytics, rows
+from collections import defaultdict
 
 
 def compare(value: float, condition: str, threshold: float) -> bool:
@@ -77,6 +78,57 @@ def estimated_resolution_priority(metric: str, severity: str) -> str:
     return "P4 - Resolve within 72 hours"
 
 
+def estimated_completion_hours(severity: str, observed: float, threshold: float) -> float:
+    """Compute estimated completion time based on severity and magnitude of deviation."""
+    base_hours = {"Critical": 2.0, "High": 8.0, "Medium": 24.0, "Low": 72.0}.get(severity, 24.0)
+    if threshold == 0:
+        return base_hours
+    deviation = abs(observed - threshold) / max(abs(threshold), 1)
+    multiplier = min(1.5, max(0.5, deviation))
+    return round(base_hours * multiplier, 2)
+
+
+def completion_time_label(hours: float) -> str:
+    if hours <= 2:
+        return "Within 2 hours"
+    if hours <= 8:
+        return "Within 8 hours"
+    if hours <= 24:
+        return "Within 24 hours"
+    if hours <= 72:
+        return "Within 72 hours"
+    return "Within 1 week"
+
+
+def enhanced_owner_assignment(rule_recommended_owner: str, severity: str, affected_region: str) -> dict[str, object]:
+    """Refine owner assignment with role-based escalation."""
+    primary = rule_recommended_owner or "NOC Manager"
+    backup = "Network Operations Director" if severity in ("Critical", "High") else "NOC Manager"
+    escalation_path = [
+        primary,
+        backup,
+        "VP Operations" if severity == "Critical" else backup,
+    ]
+    return {
+        "primary_owner": primary,
+        "backup_owner": backup,
+        "escalation_path": escalation_path,
+        "assignee_role": severity,
+        "region_focus": affected_region,
+    }
+
+
+def recommendation_owner_pool() -> dict[str, list[str]]:
+    """Available owners grouped by recommendation type."""
+    return {
+        "infrastructure": ["Network Operations Director", "Infrastructure Engineering", "Capacity Planning"],
+        "service_quality": ["Service Quality Manager", "NOC Manager", "Customer Assurance"],
+        "incident": ["Incident Response Lead", "NOC Manager", "On-call Engineer"],
+        "customer": ["Customer Assurance Lead", "Service Quality Manager", "Account Manager"],
+        "compliance": ["Compliance Officer", "VP Operations", "Audit Team"],
+    }
+
+
 def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[str, object]:
     rules = rows("recommendation_rules")
     overview = overview_metrics(filters=filters)
@@ -126,6 +178,9 @@ def rule_based_recommendations(filters: AnalyticsFilters | None = None) -> dict[
                 "technical_impact": technical_impact_text(metric, observed, threshold, affected_region),
                 "expected_impact": f"Without action, the observed degradation may persist or worsen.",
                 "resolution_priority": estimated_resolution_priority(metric, severity),
+                "estimated_completion_hours": estimated_completion_hours(severity, observed, threshold),
+                "completion_time_label": completion_time_label(estimated_completion_hours(severity, observed, threshold)),
+                "owner_assignment": enhanced_owner_assignment(rule["recommended_owner"], severity, affected_region),
                 "region": affected_region,
             }
         )
