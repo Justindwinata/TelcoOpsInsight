@@ -16,6 +16,8 @@ NOTIFICATION_CATEGORIES = [
     ("technician", "Technician", "Workload alerts and capacity"),
     ("ticket", "Tickets", "Customer ticket backlog"),
     ("recommendation", "Recommendations", "Operational recommendations triggered"),
+    ("maintenance", "Maintenance", "Upcoming and overdue maintenance"),
+    ("resolved", "Resolved", "Completed incidents and resolved issues"),
 ]
 
 
@@ -159,6 +161,50 @@ def generate_notifications(filters: AnalyticsFilters | None = None) -> dict[str,
             "count": len(triggered),
             "action_url": "/recommendations",
             "action_label": "View Recommendations",
+        })
+
+    # Maintenance notifications
+    job_rows_all = apply_filters(rows("field_technician_jobs"), filters)
+    upcoming_jobs = [r for r in job_rows_all if r.get("status") == "Open"]
+    overdue_jobs = [r for r in upcoming_jobs if str(r.get("date", "")) < "2026-08-03"]
+
+    if overdue_jobs:
+        notifications.append({
+            "id": "maintenance-overdue",
+            "category": "maintenance",
+            "severity": "High",
+            "title": f"{len(overdue_jobs)} Overdue Maintenance Job(s)",
+            "message": "Scheduled maintenance tasks are past due and require immediate attention",
+            "count": len(overdue_jobs),
+            "action_url": "/maintenance",
+            "action_label": "View Maintenance",
+        })
+    elif len(upcoming_jobs) > 20:
+        notifications.append({
+            "id": "maintenance-upcoming",
+            "category": "maintenance",
+            "severity": "Medium",
+            "title": f"{len(upcoming_jobs)} Upcoming Maintenance Jobs",
+            "message": "Significant number of scheduled maintenance tasks in pipeline",
+            "count": len(upcoming_jobs),
+            "action_url": "/maintenance",
+            "action_label": "View Maintenance",
+        })
+
+    # Resolved/recovered notifications
+    resolved_incidents = [r for r in incident_rows if r.get("status") in ("Resolved", "Closed")]
+    recent_resolved = [r for r in resolved_incidents if str(r.get("date", ""))[:10] == "2026-08-03"]
+
+    if len(recent_resolved) > 5:
+        notifications.append({
+            "id": "incidents-resolved",
+            "category": "resolved",
+            "severity": "Low",
+            "title": f"{len(recent_resolved)} Incident(s) Resolved Today",
+            "message": "Recent incident resolutions indicate improved stability",
+            "count": len(recent_resolved),
+            "action_url": "/incidents",
+            "action_label": "View Resolved",
         })
 
     # Sort by severity priority
