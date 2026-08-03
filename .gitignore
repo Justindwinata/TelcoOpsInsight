@@ -24,3 +24,5 @@ datasets/local/
 uploads/
 backups/
 backend/backups/
+package.json
+package-lock.json
