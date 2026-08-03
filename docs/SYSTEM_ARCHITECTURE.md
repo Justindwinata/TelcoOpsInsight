@@ -18,17 +18,39 @@ flowchart LR
 
 The backend is a FastAPI application under `backend/app`.
 
+### Core Services:
 - `config.py`: project settings and paths
-- `database.py`: SQLite connection helpers
-- `routes/health.py`: health check
-- `routes/datasets.py`: seed and CSV upload validation
+- `database.py`: SQLite connection helpers with connection pooling
+- `error_handlers.py`: global error handling with consistent responses
+- `api_utils.py`: response formatting helpers
+- `filters.py`: shared analytics filter parsing
+
+### Routes:
+- `routes/auth.py`: login, logout, user session management
+- `routes/health.py`: health check endpoint
+- `routes/datasets.py`: seed, upload, import history, rollback
 - `routes/dashboard.py`: dashboard analytics endpoints
-- `routes/reports.py`: executive report endpoints
-- `services/dataset_service.py`: CSV-to-SQLite seed flow and upload validation
-- `services/analytics_service.py`: deterministic KPI and dashboard calculations
-- `services/recommendation_service.py`: deterministic rule evaluation
-- `services/report_service.py`: JSON and HTML executive summary assembly
-- `services/auth_service.py`: local demo authentication, bearer tokens, and role permissions
+- `routes/executive.py`: monthly/weekly/trend executive summaries
+- `routes/reports.py`: executive report JSON and HTML endpoints
+- `routes/audit.py`: audit log recording and retrieval
+
+### Enterprise Modules (TOI-0004):
+- `routes/assets.py`: asset inventory and detail endpoints
+- `routes/maintenance.py`: maintenance schedule and job tracking
+- `routes/changes.py`: change management workflow with transitions
+- `routes/rca.py`: root cause analysis with structured templates
+- `routes/timeline.py`: incident timeline reconstruction
+
+### Enterprise Services:
+- `services/asset_service.py`: 7 asset types with status, ownership, capacity
+- `services/maintenance_service.py`: preventive/corrective/emergency workflows
+- `services/change_service.py`: planned/emergency/standard changes with approval
+- `services/rca_service.py`: 5 Whys/Fishbone/Barrier analysis methods
+- `services/timeline_service.py`: chronological incident event reconstruction
+- `services/executive_service.py`: KPI comparison, monthly/weekly/trend summaries
+- `services/recommendation_service.py`: priority scoring, business/technical impact
+- `services/analytics_service.py`: KPI calculations, region/service analytics
+- `services/audit_service.py`: audit trail for sensitive operations
 
 ## Frontend
 
