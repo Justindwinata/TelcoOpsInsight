@@ -80,6 +80,11 @@ def preview_dataset(rows: list[dict[str, str]], limit: int = 5) -> dict[str, obj
     }
 
 
+def load_csv(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
 def create_table(connection: sqlite3.Connection, table_name: str, columns: list[str]) -> None:
     quoted_columns = ", ".join(f'"{column}" TEXT' for column in columns)
     connection.execute(f'DROP TABLE IF EXISTS "{table_name}"')
