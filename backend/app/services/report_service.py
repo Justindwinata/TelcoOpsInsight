@@ -32,6 +32,64 @@ def executive_summary(filters: AnalyticsFilters | None = None) -> dict[str, obje
     }
 
 
+def comparison_report(current_filters: AnalyticsFilters | None = None, previous_filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    """Generate comparative report across two time periods."""
+    current = overview_metrics(filters=current_filters)
+    previous = overview_metrics(filters=previous_filters)
+    
+    def delta(curr, prev):
+        if prev == 0:
+            return 0 if curr == 0 else 100
+        return round(((curr - prev) / prev) * 100, 2)
+    
+    return {
+        "title": "TelcoOps Insight Comparison Report",
+        "company": settings.company_name,
+        "synthetic_data_only": True,
+        "report_type": "comparison",
+        "current_period": current_filters.metadata() if current_filters else {},
+        "previous_period": previous_filters.metadata() if previous_filters else {},
+        "current_metrics": current,
+        "previous_metrics": previous,
+        "deltas": {
+            "network_uptime": delta(current["network_uptime"], previous["network_uptime"]),
+            "sla_achievement": delta(current["sla_achievement"], previous["sla_achievement"]),
+            "active_incidents": delta(current["active_incidents"], previous["active_incidents"]),
+            "open_tickets": delta(current["open_ticket_backlog"], previous["open_ticket_backlog"]),
+            "avg_mttr": delta(current["average_mttr_minutes"], previous["average_mttr_minutes"]),
+            "customer_satisfaction": delta(current["customer_satisfaction"], previous["customer_satisfaction"]),
+        },
+        "improvements": [k for k, v in {
+            "network_uptime": current["network_uptime"] > previous["network_uptime"],
+            "sla_achievement": current["sla_achievement"] > previous["sla_achievement"],
+            "incident_reduction": current["active_incidents"] < previous["active_incidents"],
+            "ticket_reduction": current["open_ticket_backlog"] < previous["open_ticket_backlog"],
+            "mttr_improvement": current["average_mttr_minutes"] < previous["average_mttr_minutes"],
+            "satisfaction_improvement": current["customer_satisfaction"] > previous["customer_satisfaction"],
+        }.items() if v],
+    }
+
+
+def filtered_report(filters: AnalyticsFilters | None = None) -> dict[str, object]:
+    """Generate report with specific filters applied."""
+    overview = overview_metrics(filters=filters)
+    incidents = incident_analytics(filters=filters)
+    regions = region_analytics(filters=filters)
+    recommendations = rule_based_recommendations(filters=filters)
+    
+    return {
+        "title": "TelcoOps Insight Filtered Report",
+        "company": settings.company_name,
+        "synthetic_data_only": True,
+        "report_type": "filtered",
+        "filter_metadata": filters.metadata() if filters else {},
+        "overview": overview,
+        "incidents": incidents,
+        "regions": regions,
+        "recommendations": recommendations["recommendations"][:8],
+    }
+
+
 def executive_summary_html(filters: AnalyticsFilters | None = None) -> str:
     report = executive_summary(filters=filters)
     overview = report["overview"]
