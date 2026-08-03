@@ -31,6 +31,7 @@ from app.services.advanced_analytics import (
 )
 from app.services.intelligence_service import generate_operational_insights
 from app.services.brief_service import generate_executive_brief
+from app.services.trend_service import incident_trend_analysis
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -153,4 +154,9 @@ def dashboard_intelligence(filters: AnalyticsFilters = Depends(build_filters)) -
 @router.get("/brief")
 def dashboard_brief(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(generate_executive_brief(filters=filters), filters)
+
+
+@router.get("/trends")
+def dashboard_trends(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(incident_trend_analysis(filters=filters), filters)
 
