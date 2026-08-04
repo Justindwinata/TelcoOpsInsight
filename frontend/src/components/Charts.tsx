@@ -14,7 +14,7 @@ export function CustomTooltip({ active, payload, label }: ChartTooltipProps) {
       <p className="tooltip-label">{label}</p>
       {payload.map((entry, index) => (
         <p key={index} className="tooltip-item" style={{ color: entry.color || "#2563eb" }}>
-          {entry.name}: <strong>{entry.value}</strong>
+          {entry.name}: <strong>{typeof entry.value === 'number' ? entry.value.toFixed(2) : entry.value}</strong>
         </p>
       ))}
     </div>
