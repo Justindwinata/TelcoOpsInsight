@@ -42,6 +42,7 @@ from app.services.asset_lifecycle_service import (
     search_assets,
     maintenance_scheduling,
 )
+from app.services.scorecards_service import executive_scorecards
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -235,3 +236,8 @@ def dashboard_asset_search(
 @router.get("/assets/maintenance")
 def dashboard_maintenance_schedule() -> dict[str, object]:
     return maintenance_scheduling()
+
+
+@router.get("/scorecards")
+def dashboard_scorecards(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(executive_scorecards(filters=filters), filters)
