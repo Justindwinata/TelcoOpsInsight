@@ -20,9 +20,11 @@ import { SlaAssurance } from "./pages/SlaAssurance";
 import { Tickets } from "./pages/Tickets";
 import { Login } from "./pages/Login";
 import { NetworkHealthIndex, CapacityUtilization, KpiComparison } from "./pages/AdvancedAnalytics";
+import { ExecutiveIntelligence } from "./pages/ExecutiveIntelligence";
 
 const sections = [
   "Executive Overview",
+  "Executive Intelligence",
   "Network Health",
   "Network Health Index",
   "Capacity Utilization",
@@ -49,6 +51,8 @@ function renderSection(section: Section) {
   switch (section) {
     case "Executive Overview":
       return <ExecutiveOverview />;
+    case "Executive Intelligence":
+      return <ExecutiveIntelligence />;
     case "Network Health":
       return <NetworkHealth />;
     case "Network Health Index":
