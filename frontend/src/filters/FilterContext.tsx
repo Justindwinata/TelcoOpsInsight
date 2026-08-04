@@ -8,6 +8,7 @@ export type DashboardFilters = {
   service_type: string;
   severity: string;
   status: string;
+  team: string;
 };
 
 const STORAGE_KEY = "telcoops_dashboard_filters";
@@ -18,7 +19,8 @@ const emptyFilters: DashboardFilters = {
   region: "",
   service_type: "",
   severity: "",
-  status: ""
+  status: "",
+  team: ""
 };
 
 type FilterContextValue = {
@@ -68,7 +70,8 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
       region: "Region",
       service_type: "Service",
       severity: "Severity",
-      status: "Status"
+      status: "Status",
+      team: "Team"
     };
     const active = Object.entries(filters)
       .filter(([, filterValue]) => Boolean(filterValue))
