@@ -93,6 +93,7 @@ export function KpiGrid({ items }: KpiGridProps) {
         <div key={index} className={`kpi-card tone-${item.tone || "neutral"}`}>
           <div className="kpi-label">{item.label}</div>
           <div className="kpi-value">{item.value}</div>
+          <span className="kpi-skeleton" style={{ opacity: 0 }}></span>
         </div>
       ))}
     </section>
