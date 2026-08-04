@@ -23,6 +23,15 @@ def manager_headers():
     )
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
+@pytest.fixture()
+def headers_viewer():
+    client = TestClient(app)
+    response = client.post(
+        "/api/auth/login",
+        json={"username": "viewer", "password": DEMO_PASSWORD},
+    )
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
 def test_network_map_endpoint(manager_headers):
     client = TestClient(app)
     response = client.get(
