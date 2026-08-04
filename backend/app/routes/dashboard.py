@@ -44,6 +44,7 @@ from app.services.asset_lifecycle_service import (
 )
 from app.services.scorecards_service import executive_scorecards
 from app.services.map_service import regional_map_data
+from app.services.forecast_service import operational_forecasting
 from app.services.network_map_service import network_map_data
 
 
@@ -248,6 +249,11 @@ def dashboard_scorecards(filters: AnalyticsFilters = Depends(build_filters)) -> 
 @router.get("/map")
 def dashboard_map(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(regional_map_data(filters=filters), filters)
+
+
+@router.get("/forecast")
+def dashboard_forecast(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(operational_forecasting(filters=filters), filters)
 
 
 @router.get("/map")
