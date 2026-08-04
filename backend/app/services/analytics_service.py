@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from datetime import date
 from functools import lru_cache
-from typing import Iterable
+from typing import Iterable, Any
 
 from app.database import fetch_all
 from app.filters import AnalyticsFilters
@@ -37,9 +37,17 @@ def rows(table: str) -> list[dict[str, object]]:
         raise RuntimeError(f"Failed to fetch data from table {table}: {exc}") from exc
 
 
-def count_by(data: Iterable[dict[str, object]], field: str) -> list[dict[str, object]]:
-    counts = Counter(str(row.get(field, "Unknown")) for row in data)
-    return [{"name": key, "value": value} for key, value in sorted(counts.items())]
+def fetch_rows(tables: list[str]) -> dict[str, list[dict[str, object]]]:
+    """Fetch multiple tables in one call to reduce duplication."""
+    result = {}
+    for table in tables:
+        result[table] = rows(table)
+    return result
+
+
+def filter_rows(data: list[dict[str, object]], query: AnalyticsFilters) -> list[dict[str, object]]:
+    """Apply filters to a dataset."""
+    return apply_filters(data, query)
 
 
 def as_float(value: object, default: float = 0.0) -> float:
