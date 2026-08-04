@@ -19,18 +19,18 @@ export function AssetManagement() {
 
   const totalAssets = integerValue(data.total_assets);
   const activeCount = integerValue(data.active_count);
-  const faultyCount = integerValue(data.faulty_count);
+  const faultyCount = data.faulty_count;
   const maintenanceCount = integerValue(data.maintenance_count);
-  const healthScore = numberValue(data.health_score);
+  const healthScore = data.health_score;
 
   return (
     <div className="grid">
       <section className="kpi-grid">
         <KpiCard label="Total Assets" value={totalAssets} tone="neutral" />
         <KpiCard label="Active" value={activeCount} tone="healthy" />
-        <KpiCard label="Faulty" value={faultyCount} tone={faultyCount > 0 ? "warning" : "neutral"} />
+        <KpiCard label="Faulty" value={integerValue(faultyCount)} tone={faultyCount > 0 ? "warning" : "neutral"} />
         <KpiCard label="In Maintenance" value={maintenanceCount} tone="neutral" />
-        <KpiCard label="Health Score" value={`${healthScore}%`} tone={data.health_score < 85 ? "warning" : "healthy"} />
+        <KpiCard label="Health Score" value={`${healthScore}%`} tone={healthScore < 85 ? "warning" : "healthy"} />
       </section>
 
       <CollapsibleWidget title="Asset Search" badge={searchQuery ? "Search Active" : undefined}>
