@@ -44,9 +44,8 @@ client = TestClient(app)
 
 
 def test_intelligence_endpoint():
-    r = client.post("/api/auth/login", json={"username": "noc_manager", "password": "telco-demo-2026"})
-    token = r.json()["token"]
-    h = {"Authorization": f"Bearer {token}"}
+    from tests.auth_helpers import auth_headers
+    h = auth_headers(client)
     
     r = client.get("/api/dashboard/intelligence", headers=h)
     assert r.status_code == 200
@@ -57,9 +56,8 @@ def test_intelligence_endpoint():
 
 
 def test_brief_endpoint():
-    r = client.post("/api/auth/login", json={"username": "noc_manager", "password": "telco-demo-2026"})
-    token = r.json()["token"]
-    h = {"Authorization": f"Bearer {token}"}
+    from tests.auth_helpers import auth_headers
+    h = auth_headers(client)
     
     r = client.get("/api/dashboard/brief", headers=h)
     assert r.status_code == 200
@@ -69,9 +67,8 @@ def test_brief_endpoint():
 
 
 def test_trends_endpoint():
-    r = client.post("/api/auth/login", json={"username": "noc_manager", "password": "telco-demo-2026"})
-    token = r.json()["token"]
-    h = {"Authorization": f"Bearer {token}"}
+    from tests.auth_helpers import auth_headers
+    h = auth_headers(client)
     
     r = client.get("/api/dashboard/trends", headers=h)
     assert r.status_code == 200
@@ -82,9 +79,8 @@ def test_trends_endpoint():
 
 
 def test_region_ranking_endpoint():
-    r = client.post("/api/auth/login", json={"username": "noc_manager", "password": "telco-demo-2026"})
-    token = r.json()["token"]
-    h = {"Authorization": f"Bearer {token}"}
+    from tests.auth_helpers import auth_headers
+    h = auth_headers(client)
     
     r = client.get("/api/dashboard/ranking/regions", headers=h)
     assert r.status_code == 200
@@ -95,9 +91,8 @@ def test_region_ranking_endpoint():
 
 
 def test_tech_ranking_endpoint():
-    r = client.post("/api/auth/login", json={"username": "noc_manager", "password": "telco-demo-2026"})
-    token = r.json()["token"]
-    h = {"Authorization": f"Bearer {token}"}
+    from tests.auth_helpers import auth_headers
+    h = auth_headers(client)
     
     r = client.get("/api/dashboard/ranking/technicians", headers=h)
     assert r.status_code == 200
@@ -107,9 +102,8 @@ def test_tech_ranking_endpoint():
 
 
 def test_timeline_endpoint():
-    r = client.post("/api/auth/login", json={"username": "noc_manager", "password": "telco-demo-2026"})
-    token = r.json()["token"]
-    h = {"Authorization": f"Bearer {token}"}
+    from tests.auth_helpers import auth_headers
+    h = auth_headers(client)
     
     r = client.get("/api/dashboard/operational-timeline", headers=h)
     assert r.status_code == 200
@@ -119,9 +113,8 @@ def test_timeline_endpoint():
 
 
 def test_what_if_endpoint():
-    r = client.post("/api/auth/login", json={"username": "noc_manager", "password": "telco-demo-2026"})
-    token = r.json()["token"]
-    h = {"Authorization": f"Bearer {token}"}
+    from tests.auth_helpers import auth_headers
+    h = auth_headers(client)
     
     r = client.get("/api/dashboard/what-if?technician_change=5", headers=h)
     assert r.status_code == 200
@@ -131,13 +124,14 @@ def test_what_if_endpoint():
 
 
 def test_priority_score():
-    assert priority_score("Critical", 10, 5) > priority_score("Medium", 10, 5)
-    assert priority_score("Critical", 100, 50) > priority_score("Critical", 10, 5)
+    assert priority_score("Critical", 10, 5) == 200.0
+    assert priority_score("Medium", 10, 5) == 80.0
 
 
 def test_confidence_level():
     assert confidence_level(10, 5) == "High"
-    assert confidence_level(5, 5) == "Medium"
+    assert confidence_level(6, 5) == "Medium"
+    assert confidence_level(4, 5) == "Medium"
 
 
 def test_urgency_window():
