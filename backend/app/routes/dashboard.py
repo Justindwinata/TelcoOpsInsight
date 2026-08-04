@@ -43,6 +43,8 @@ from app.services.asset_lifecycle_service import (
     maintenance_scheduling,
 )
 from app.services.scorecards_service import executive_scorecards
+from app.services.map_service import regional_map_data
+from app.services.network_map_service import network_map_data
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -241,3 +243,13 @@ def dashboard_maintenance_schedule() -> dict[str, object]:
 @router.get("/scorecards")
 def dashboard_scorecards(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
     return with_filter_metadata(executive_scorecards(filters=filters), filters)
+
+
+@router.get("/map")
+def dashboard_map(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(regional_map_data(filters=filters), filters)
+
+
+@router.get("/map")
+def dashboard_network_map(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(network_map_data(filters=filters), filters)
