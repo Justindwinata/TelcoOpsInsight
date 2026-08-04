@@ -213,6 +213,8 @@ Not implemented or claimed: real-time NOC monitoring, real Telkom/company data, 
 - `docs/DEMO_SCRIPT.md` - Guided demo walkthrough
 - `docs/TOI_0004_ENTERPRISE_READINESS_AUDIT.md` - Enterprise capability assessment
 - `docs/TOI_0004_MANUAL_QA_REPORT.md` - Comprehensive manual QA results (186 tests)
+- `docs/TOI_0005_MANUAL_QA.md` - Operational intelligence manual QA (23 frontend tests)
+- `docs/TOI_0006_MANUAL_QA.md` - Executive decision center manual QA
 - `docs/KNOWN_LIMITATIONS.md` - System constraints and future roadmap
 
 ## License
