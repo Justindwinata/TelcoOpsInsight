@@ -36,6 +36,12 @@ from app.services.ranking_service import regional_performance_ranking
 from app.services.tech_performance_service import technician_performance_scoring
 from app.services.operational_timeline_service import operational_timeline
 from app.services.simulation_service import simulate_kpi_changes
+from app.services.asset_lifecycle_service import (
+    asset_lifecycle_analysis,
+    asset_detail,
+    search_assets,
+    maintenance_scheduling,
+)
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/dashboard", tags=["dashboard"])
@@ -201,3 +207,31 @@ def dashboard_what_if_simulation(
     if replace_faulty_assets is not None:
         params["replace_faulty_assets"] = replace_faulty_assets
     return with_filter_metadata(simulate_kpi_changes(params=params, filters=filters), filters)
+
+
+@router.get("/assets/lifecycle")
+def dashboard_asset_lifecycle(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    return with_filter_metadata(asset_lifecycle_analysis(filters=filters), filters)
+
+
+@router.get("/assets/detail/{asset_id}")
+def dashboard_asset_detail(asset_id: str) -> dict[str, object]:
+    detail = asset_detail(asset_id)
+    if not detail:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"Asset not found: {asset_id}")
+    return detail
+
+
+@router.get("/assets/search")
+def dashboard_asset_search(
+    query: str,
+    filters: AnalyticsFilters = Depends(build_filters),
+) -> dict[str, object]:
+    results = search_assets(query, filters=filters)
+    return {"assets": results, "total": len(results), "query": query}
+
+
+@router.get("/assets/maintenance")
+def dashboard_maintenance_schedule() -> dict[str, object]:
+    return maintenance_scheduling()
