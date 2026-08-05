@@ -28,10 +28,18 @@ import { WorkforceManagement } from "./pages/WorkforceManagement";
 import { DispatchCenter } from "./pages/DispatchCenter";
 import { SLAMonitoring } from "./pages/SLAMonitoring";
 import { CapacityPlanning } from "./pages/CapacityPlanning";
+import { NOCCommandCenter } from "./pages/NOCCommandCenter";
+import { AlarmManagement } from "./pages/AlarmManagement";
+import { MajorIncidents } from "./pages/MajorIncidents";
+import { MaintenanceCalendar } from "./pages/MaintenanceCalendar";
+import { ExecutiveBusinessDashboard } from "./pages/ExecutiveBusinessDashboard";
+import { ExportCenter } from "./pages/ExportCenter";
 
 const sections = [
+  "NOC Command Center",
   "Executive Overview",
   "Executive Intelligence",
+  "Executive Business Dashboard",
   "Network Health",
   "Network Map",
   "Network Health Index",
@@ -48,12 +56,16 @@ const sections = [
   "Recommendations",
   "Asset Management",
   "Maintenance Schedule",
+  "Maintenance Calendar",
   "Change Management",
   "Root Cause Analysis",
   "Incident Timeline",
   "SLA Monitoring",
   "Capacity Planning",
   "Executive Decision Center",
+  "Alarm Management",
+  "Major Incidents",
+  "Export Center",
   "Data Upload",
   "Audit Logs",
   "Report"
@@ -63,10 +75,14 @@ export type Section = (typeof sections)[number];
 
 function renderSection(section: Section) {
   switch (section) {
+    case "NOC Command Center":
+      return <NOCCommandCenter />;
     case "Executive Overview":
       return <ExecutiveOverview />;
     case "Executive Intelligence":
       return <ExecutiveIntelligence />;
+    case "Executive Business Dashboard":
+      return <ExecutiveBusinessDashboard />;
     case "Network Health":
       return <NetworkHealth />;
     case "Network Map":
@@ -99,6 +115,8 @@ function renderSection(section: Section) {
       return <AssetManagement />;
     case "Maintenance Schedule":
       return <MaintenanceSchedule />;
+    case "Maintenance Calendar":
+      return <MaintenanceCalendar />;
     case "Change Management":
       return <ChangeManagement />;
     case "Root Cause Analysis":
@@ -111,6 +129,12 @@ function renderSection(section: Section) {
       return <CapacityPlanning />;
     case "Executive Decision Center":
       return <ExecutiveDecisionCenter />;
+    case "Alarm Management":
+      return <AlarmManagement />;
+    case "Major Incidents":
+      return <MajorIncidents />;
+    case "Export Center":
+      return <ExportCenter />;
     case "Data Upload":
       return <DataUpload />;
     case "Audit Logs":
