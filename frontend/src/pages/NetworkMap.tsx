@@ -94,8 +94,8 @@ export function NetworkMap() {
       });
 
       const bounds = L.latLngBounds(
-        [[data.map_bounds.south, data.map_bounds.west]],
-        [[data.map_bounds.north, data.map_bounds.east]]
+        [data.map_bounds.south, data.map_bounds.west] as [number, number],
+        [data.map_bounds.north, data.map_bounds.east] as [number, number]
       );
       map.fitBounds(bounds, { padding: [50, 50] });
       setMapReady(true);
