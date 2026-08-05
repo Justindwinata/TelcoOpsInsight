@@ -6,6 +6,7 @@ import { AssetManagement } from "./pages/AssetManagement";
 import { AuditLogs } from "./pages/AuditLogs";
 import { ChangeManagement } from "./pages/ChangeManagement";
 import { DataUpload } from "./pages/DataUpload";
+import { DispatchCenter } from "./pages/DispatchCenter";
 import { ExecutiveOverview } from "./pages/ExecutiveOverview";
 import { FieldTechnicians } from "./pages/FieldTechnicians";
 import { Incidents } from "./pages/Incidents";
@@ -35,6 +36,9 @@ const sections = [
   "SLA Assurance",
   "Customer Tickets",
   "Field Technician Dispatch",
+  "Dispatch Center",
+  "Workforce Management",
+  "Service Requests",
   "Region Performance",
   "Recommendations",
   "Asset Management",
@@ -42,6 +46,9 @@ const sections = [
   "Change Management",
   "Root Cause Analysis",
   "Incident Timeline",
+  "SLA Monitoring",
+  "Capacity Planning",
+  "Executive Decision Center",
   "Data Upload",
   "Audit Logs",
   "Report"
@@ -73,6 +80,12 @@ function renderSection(section: Section) {
       return <Tickets />;
     case "Field Technician Dispatch":
       return <FieldTechnicians />;
+    case "Dispatch Center":
+      return <DispatchCenter />;
+    case "Workforce Management":
+      return <WorkforceManagement />;
+    case "Service Requests":
+      return <EmptyState />;
     case "Region Performance":
       return <RegionPerformance />;
     case "Recommendations":
@@ -87,6 +100,12 @@ function renderSection(section: Section) {
       return <RootCauseAnalysis />;
     case "Incident Timeline":
       return <IncidentTimeline />;
+    case "SLA Monitoring":
+      return <EmptyState />;
+    case "Capacity Planning":
+      return <EmptyState />;
+    case "Executive Decision Center":
+      return <EmptyState />;
     case "Data Upload":
       return <DataUpload />;
     case "Audit Logs":
