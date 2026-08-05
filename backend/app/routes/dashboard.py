@@ -262,6 +262,7 @@ def dashboard_notification_center(filters: AnalyticsFilters = Depends(build_filt
     return with_filter_metadata(generate_notification_center(filters=filters), filters)
 
 
-@router.get("/map")
-def dashboard_network_map(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+@router.get("/map/sites")
+def dashboard_network_map_sites(filters: AnalyticsFilters = Depends(build_filters)) -> dict[str, object]:
+    from app.services.network_map_service import network_map_data
     return with_filter_metadata(network_map_data(filters=filters), filters)

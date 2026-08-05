@@ -21,11 +21,13 @@ import { Tickets } from "./pages/Tickets";
 import { Login } from "./pages/Login";
 import { NetworkHealthIndex, CapacityUtilization, KpiComparison } from "./pages/AdvancedAnalytics";
 import { ExecutiveIntelligence } from "./pages/ExecutiveIntelligence";
+import { NetworkMap } from "./pages/NetworkMap";
 
 const sections = [
   "Executive Overview",
   "Executive Intelligence",
   "Network Health",
+  "Network Map",
   "Network Health Index",
   "Capacity Utilization",
   "KPI Comparison",
@@ -55,6 +57,8 @@ function renderSection(section: Section) {
       return <ExecutiveIntelligence />;
     case "Network Health":
       return <NetworkHealth />;
+    case "Network Map":
+      return <NetworkMap />;
     case "Network Health Index":
       return <NetworkHealthIndex />;
     case "Capacity Utilization":

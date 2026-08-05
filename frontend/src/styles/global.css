@@ -1415,3 +1415,123 @@ th.sortable:hover {
 .delta-neutral {
   color: #6b7280;
 }
+
+/* Map Styles */
+.map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-marker.status-healthy .marker-inner {
+  background: #10b981;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+}
+
+.map-marker.status-warning .marker-inner {
+  background: #f59e0b;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+}
+
+.map-marker.status-critical .marker-inner {
+  background: #ef4444;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.map-popup {
+  min-width: 200px;
+}
+
+.map-popup strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #172033;
+}
+
+.map-popup dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 8px;
+  font-size: 13px;
+}
+
+.map-popup dt {
+  color: #6b7280;
+}
+
+.map-popup dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.region-health-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.region-card {
+  padding: 14px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e4ebf2;
+}
+
+.region-card.health-healthy {
+  border-left: 4px solid #10b981;
+}
+
+.region-card.health-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.region-card.health-critical {
+  border-left: 4px solid #ef4444;
+}
+
+.region-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: #172033;
+}
+
+.region-card .compact-metrics {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  font-size: 13px;
+  margin: 0;
+}
+
+.region-card .compact-metrics dt {
+  color: #6b7280;
+}
+
+.region-card .compact-metrics dd {
+  margin: 0;
+  font-weight: 500;
+}
