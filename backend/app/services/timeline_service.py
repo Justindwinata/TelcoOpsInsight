@@ -18,12 +18,19 @@ def parse_time(value: object) -> datetime | None:
     return None
 
 
-def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str | None = None) -> dict[str, object]:
-    """Build a chronological incident timeline.
+LIFECYCLE_STAGES = [
+    {"stage": "creation", "label": "Created", "description": "Incident detected and entered into system"},
+    {"stage": "acknowledgement", "label": "Acknowledged", "description": "NOC acknowledged the incident report"},
+    {"stage": "investigation", "label": "Investigating", "description": "Root cause investigation underway"},
+    {"stage": "escalation", "label": "Escalated", "description": "Incident escalated to higher tier"},
+    {"stage": "technician_dispatch", "label": "Dispatched", "description": "Technician dispatched to site"},
+    {"stage": "resolution", "label": "Resolved", "description": "Incident fix implemented"},
+    {"stage": "verification", "label": "Verified", "description": "Resolution verified by monitoring"},
+    {"stage": "closure", "label": "Closed", "description": "Post-incident review completed"},
+]
 
-    Reconstructs the incident lifecycle from detection through investigation,
-    escalation, assignment, resolution, and closure with timestamps.
-    """
+
+def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str | None = None) -> dict[str, object]:
     incident_rows = apply_filters(rows("network_incidents"), filters)
     job_rows = apply_filters(rows("field_technician_jobs"), filters)
     ticket_rows = apply_filters(rows("customer_tickets"), filters)
@@ -55,46 +62,55 @@ def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str 
 
         events: list[dict[str, object]] = []
         detected_at = start_time or f"{date_str}T00:00:00"
+
         events.append({
             "timestamp": detected_at,
-            "event": "incident.detected",
-            "title": "Incident detected",
+            "event": "incident.creation",
+            "title": "Incident created",
             "detail": f"Severity {severity} incident reported in {region} for {service_type}",
             "actor": "Monitoring System",
+            "stage": "creation",
         })
 
-        # Assignment events (derive from technician jobs)
-        related_jobs = [j for j in job_rows if str(j.get("related_incident_id", "")) == inc_id]
-        if related_jobs:
-            events.append({
-                "timestamp": start_time,
-                "event": "incident.assigned",
-                "title": "Technician assigned",
-                "detail": f"{len(related_jobs)} job(s) created for {assigned_team}",
-                "actor": assigned_team,
-            })
+        events.append({
+            "timestamp": detected_at,
+            "event": "incident.acknowledged",
+            "title": "Incident acknowledged",
+            "detail": f"NOC received and acknowledged severity {severity} incident",
+            "actor": assigned_team or "NOC Core",
+            "stage": "acknowledgement",
+        })
 
-        # Escalation events
+        events.append({
+            "timestamp": detected_at,
+            "event": "incident.investigating",
+            "title": "Investigation started",
+            "detail": f"Root cause investigation for {root_cause or 'unknown cause'}",
+            "actor": assigned_team or "NOC Core",
+            "stage": "investigation",
+        })
+
         if escalation_level and escalation_level not in ("None", "", "0"):
             events.append({
-                "timestamp": start_time,
+                "timestamp": detected_at,
                 "event": "incident.escalated",
                 "title": f"Escalation level {escalation_level}",
                 "detail": f"Incident escalated within {assigned_team or 'NOC'}",
                 "actor": "NOC Manager",
+                "stage": "escalation",
             })
 
-        # Investigation event
-        if status in ("Investigating", "Escalated", "Resolved", "Closed"):
+        related_jobs = [j for j in job_rows if str(j.get("related_incident_id", "")) == inc_id]
+        if related_jobs:
             events.append({
                 "timestamp": start_time,
-                "event": "incident.investigating",
-                "title": "Investigation started",
-                "detail": f"Root cause investigation for {root_cause or 'unknown cause'}",
-                "actor": assigned_team or "NOC Core",
+                "event": "incident.dispatch",
+                "title": "Technician dispatched",
+                "detail": f"{len(related_jobs)} job(s) created for {assigned_team}",
+                "actor": assigned_team,
+                "stage": "technician_dispatch",
             })
 
-        # Related tickets
         related_tickets = [t for t in ticket_rows if str(t.get("related_incident_id", "")) == inc_id]
         if related_tickets:
             events.append({
@@ -103,9 +119,9 @@ def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str 
                 "title": f"{len(related_tickets)} customer ticket(s) linked",
                 "detail": "Customer complaints associated with this incident",
                 "actor": "Customer Assurance",
+                "stage": "investigation",
             })
 
-        # Resolution events
         if status in ("Resolved", "Closed") and resolved_time:
             events.append({
                 "timestamp": resolved_time,
@@ -113,6 +129,7 @@ def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str 
                 "title": "Incident resolved",
                 "detail": f"Root cause: {root_cause or 'Unknown'}. Duration: {duration_minutes or 'N/A'} minutes",
                 "actor": assigned_team or "NOC Core",
+                "stage": "resolution",
             })
         elif status in ("Resolved", "Closed"):
             events.append({
@@ -121,27 +138,40 @@ def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str 
                 "title": "Incident resolved",
                 "detail": f"Root cause: {root_cause or 'Unknown'}",
                 "actor": assigned_team or "NOC Core",
+                "stage": "resolution",
             })
 
-        # Closure event
+        if status in ("Resolved", "Closed"):
+            verify_time = resolved_time or date_str
+            events.append({
+                "timestamp": verify_time,
+                "event": "incident.verified",
+                "title": "Resolution verified",
+                "detail": "Fix verified by NOC and monitoring systems. No recurrence detected.",
+                "actor": "NOC Core",
+                "stage": "verification",
+            })
+
         if status == "Closed":
             events.append({
                 "timestamp": resolved_time or date_str,
-                "event": "incident.closed",
+                "event": "incident.closure",
                 "title": "Incident closed",
                 "detail": "Post-incident review completed. Incident formally closed.",
                 "actor": "NOC Manager",
+                "stage": "closure",
             })
 
-        # Sort events chronologically, tie-break by event order
         event_order = {
-            "incident.detected": 0,
-            "incident.assigned": 1,
+            "incident.creation": 0,
+            "incident.acknowledged": 1,
             "incident.investigating": 2,
             "incident.escalated": 3,
             "incident.customer_tickets": 4,
-            "incident.resolved": 5,
-            "incident.closed": 6,
+            "incident.dispatch": 5,
+            "incident.resolved": 6,
+            "incident.verified": 7,
+            "incident.closure": 8,
         }
         events.sort(
             key=lambda e: (
@@ -165,11 +195,11 @@ def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str 
             "start_time": start_time,
             "resolved_time": resolved_time,
             "event_count": len(events),
+            "lifecycle_stages": [e for e in events if "stage" in e],
             "events": events[:15],
         }
         timelines.append(timeline_entry)
 
-        # Summary row for aggregate view
         summary_rows.append({
             "incident_id": inc_id,
             "date": date_str,
@@ -182,6 +212,8 @@ def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str 
             "root_cause": root_cause,
             "affected_customers": affected_customers,
             "duration_minutes": duration_minutes,
+            "lifecycle_completed": status == "Closed",
+            "lifecycle_stages_present": len([e for e in events if "stage" in e]),
         })
 
     total = len(timelines)
@@ -196,6 +228,7 @@ def incident_timeline(filters: AnalyticsFilters | None = None, incident_id: str 
         "resolved": resolved,
         "closed": closed,
         "average_events_per_incident": avg_events,
+        "lifecycle_stages": LIFECYCLE_STAGES,
         "timelines": timelines[:50],
         "incidents": summary_rows[:50],
     }
