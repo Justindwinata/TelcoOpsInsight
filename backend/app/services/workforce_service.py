@@ -46,6 +46,8 @@ def ensure_workforce_tables() -> None:
             )
             """
         )
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_workforce_region_status ON workforce_technicians(region, status)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_workforce_team ON workforce_technicians(assigned_team)")
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS workforce_skills (
