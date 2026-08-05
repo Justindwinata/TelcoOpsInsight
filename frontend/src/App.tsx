@@ -23,6 +23,11 @@ import { Login } from "./pages/Login";
 import { NetworkHealthIndex, CapacityUtilization, KpiComparison } from "./pages/AdvancedAnalytics";
 import { ExecutiveIntelligence } from "./pages/ExecutiveIntelligence";
 import { NetworkMap } from "./pages/NetworkMap";
+import { ExecutiveDecisionCenter } from "./pages/ExecutiveDecisionCenter";
+import { WorkforceManagement } from "./pages/WorkforceManagement";
+import { DispatchCenter } from "./pages/DispatchCenter";
+import { SLAMonitoring } from "./pages/SLAMonitoring";
+import { CapacityPlanning } from "./pages/CapacityPlanning";
 
 const sections = [
   "Executive Overview",
@@ -101,11 +106,11 @@ function renderSection(section: Section) {
     case "Incident Timeline":
       return <IncidentTimeline />;
     case "SLA Monitoring":
-      return <EmptyState />;
+      return <SLAMonitoring />;
     case "Capacity Planning":
-      return <EmptyState />;
+      return <CapacityPlanning />;
     case "Executive Decision Center":
-      return <EmptyState />;
+      return <ExecutiveDecisionCenter />;
     case "Data Upload":
       return <DataUpload />;
     case "Audit Logs":
