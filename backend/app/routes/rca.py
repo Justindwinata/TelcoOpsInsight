@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from app.config import settings
 from app.services.auth_service import DemoUser, get_current_user
-from app.services.rca_service import RCA_CATEGORIES, RCA_METHODS, RCA_STATUSES, create_rca, list_rcas, rca_summary, update_rca
+from app.services.rca_service import RCA_CATEGORIES, RCA_METHODS, RCA_STATUSES, add_linked_incident, create_rca, get_linked_incidents, list_rcas, rca_summary, rule_based_rca_inference, update_rca
 
 
 router = APIRouter(prefix=f"{settings.api_prefix}/rca", tags=["rca"])
@@ -35,6 +35,16 @@ class RcaUpdateRequest(BaseModel):
     status: str | None = None
     assigned_engineer: str | None = None
     preventive_actions: str | None = None
+    corrective_actions: str | None = None
+    affected_services: str | None = None
+    impacted_regions: str | None = None
+    probable_cause: str | None = None
+
+
+class LinkedIncidentRequest(BaseModel):
+    linked_incident_id: str
+    relationship_type: str = "Related"
+    notes: str = ""
 
 
 @router.get("/summary")
@@ -66,3 +76,28 @@ def create_rca_record(payload: RcaCreateRequest, user: DemoUser = Depends(get_cu
 @router.put("/{rca_id}")
 def update_rca_record(rca_id: str, payload: RcaUpdateRequest, user: DemoUser = Depends(get_current_user)) -> dict[str, object]:
     return update_rca(rca_id, payload.model_dump(exclude_none=True))
+
+
+@router.get("/{rca_id}/linked-incidents")
+def get_linked_incidents_endpoint(
+    rca_id: str,
+    _: DemoUser = Depends(get_current_user),
+) -> list[dict[str, object]]:
+    return get_linked_incidents(rca_id)
+
+
+@router.post("/{rca_id}/linked-incidents")
+def add_linked_incident_endpoint(
+    rca_id: str,
+    payload: LinkedIncidentRequest,
+    _: DemoUser = Depends(get_current_user),
+) -> dict[str, object]:
+    return add_linked_incident(rca_id, payload.linked_incident_id, payload.relationship_type, payload.notes)
+
+
+@router.get("/incidents/{incident_id}/inference")
+def rca_inference_endpoint(
+    incident_id: str,
+    _: DemoUser = Depends(get_current_user),
+) -> dict[str, object]:
+    return rule_based_rca_inference(incident_id)

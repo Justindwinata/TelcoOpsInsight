@@ -43,9 +43,27 @@ def ensure_rca_table() -> None:
                 service_type TEXT NOT NULL,
                 assigned_engineer TEXT,
                 preventive_actions TEXT,
+                corrective_actions TEXT,
+                affected_services TEXT,
+                impacted_regions TEXT,
+                probable_cause TEXT,
                 created_by TEXT NOT NULL,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
+            )
+            """
+        )
+        
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS rca_linked_incidents (
+                link_id TEXT PRIMARY KEY,
+                rca_id TEXT NOT NULL,
+                linked_incident_id TEXT NOT NULL,
+                relationship_type TEXT NOT NULL,
+                notes TEXT,
+                linked_at TEXT NOT NULL,
+                FOREIGN KEY (rca_id) REFERENCES rca_records(rca_id)
             )
             """
         )
@@ -101,8 +119,9 @@ def create_rca(payload: dict[str, object], actor: str) -> dict[str, object]:
             INSERT INTO rca_records (
                 rca_id, incident_id, title, root_cause_category, root_cause_description,
                 resolution, lessons_learned, method, status, severity, region, service_type,
-                assigned_engineer, preventive_actions, created_by, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                assigned_engineer, preventive_actions, corrective_actions, affected_services,
+                impacted_regions, probable_cause, created_by, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 rca_id,
@@ -119,6 +138,10 @@ def create_rca(payload: dict[str, object], actor: str) -> dict[str, object]:
                 str(payload.get("service_type", "")),
                 str(payload.get("assigned_engineer", "")),
                 str(payload.get("preventive_actions", "")),
+                str(payload.get("corrective_actions", "")),
+                str(payload.get("affected_services", "")),
+                str(payload.get("impacted_regions", "")),
+                str(payload.get("probable_cause", "")),
                 actor,
                 now,
                 now,
@@ -132,7 +155,8 @@ def update_rca(rca_id: str, payload: dict[str, object]) -> dict[str, object]:
     now = utc_now()
     allowed_fields = [
         "title", "root_cause_description", "resolution", "lessons_learned",
-        "status", "assigned_engineer", "preventive_actions",
+        "status", "assigned_engineer", "preventive_actions", "corrective_actions",
+        "affected_services", "impacted_regions", "probable_cause",
     ]
     updates = []
     params: list[object] = []
@@ -188,4 +212,168 @@ def rca_summary() -> dict[str, object]:
         "statuses": RCA_STATUSES,
         "categories": RCA_CATEGORIES,
         "methods": RCA_METHODS,
+    }
+
+
+def add_linked_incident(rca_id: str, linked_incident_id: str, relationship_type: str, notes: str = "") -> dict[str, object]:
+    ensure_rca_table()
+    link_id = f"LINK-{uuid.uuid4().hex[:8].upper()}"
+    now = utc_now()
+    
+    with get_connection() as connection:
+        connection.execute(
+            """
+            INSERT INTO rca_linked_incidents (
+                link_id, rca_id, linked_incident_id, relationship_type, notes, linked_at
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (link_id, rca_id, linked_incident_id, relationship_type, notes, now),
+        )
+        return dict(connection.execute("SELECT * FROM rca_linked_incidents WHERE link_id = ?", (link_id,)).fetchone())
+
+
+def get_linked_incidents(rca_id: str) -> list[dict[str, object]]:
+    ensure_rca_table()
+    with get_connection() as connection:
+        rows = connection.execute("SELECT * FROM rca_linked_incidents WHERE rca_id = ?", (rca_id,)).fetchall()
+        return [dict(row) for row in rows]
+
+
+def rule_based_rca_inference(incident_id: str) -> dict[str, object]:
+    ensure_rca_table()
+    with get_connection() as connection:
+        incident = connection.execute("SELECT * FROM network_incidents WHERE incident_id = ?", (incident_id,)).fetchone()
+    
+    if not incident:
+        return {"probable_cause": "Unknown", "confidence": 0.0, "factors": []}
+    
+    root_cause = str(incident.get("root_cause", ""))
+    severity = str(incident.get("severity", ""))
+    service_type = str(incident.get("service_type", ""))
+    region = str(incident.get("region", ""))
+    escalation_level = str(incident.get("escalation_level", ""))
+    affected_customers = int(incident.get("affected_customers", "0") or 0)
+    
+    probable_cause = ""
+    confidence = 0.5
+    factors = []
+    
+    if "equipment" in root_cause.lower() or "hardware" in root_cause.lower() or "failure" in root_cause.lower():
+        probable_cause = "Equipment Failure"
+        confidence = 0.8
+        factors.append("Hardware malfunction detected")
+    elif "config" in root_cause.lower() or "configuration" in root_cause.lower():
+        probable_cause = "Configuration Error"
+        confidence = 0.75
+        factors.append("Configuration change prior to incident")
+    elif "human" in root_cause.lower() or "error" in root_cause.lower() or "mistake" in root_cause.lower():
+        probable_cause = "Human Error"
+        confidence = 0.7
+        factors.append("Operator action identified")
+    elif "weather" in root_cause.lower() or "environment" in root_cause.lower() or "storm" in root_cause.lower():
+        probable_cause = "Environmental Factor"
+        confidence = 0.85
+        factors.append("Severe weather conditions")
+    elif "vendor" in root_cause.lower() or "third party" in root_cause.lower():
+        probable_cause = "Vendor Issue"
+        confidence = 0.7
+        factors.append("Third-party dependency failure")
+    else:
+        probable_cause = "Process Issue"
+        confidence = 0.5
+        factors.append("Under investigation")
+    
+    if severity == "Critical":
+        confidence += 0.1
+        factors.append("Critical severity escalation")
+    if affected_customers > 10000:
+        confidence += 0.05
+        factors.append("Large customer impact")
+    if escalation_level and escalation_level not in ("None", "", "0"):
+        confidence += 0.05
+        factors.append(f"Escalated to level {escalation_level}")
+    
+    confidence = min(confidence, 0.95)
+    
+    affected_services = service_type
+    impacted_regions = region
+    
+    corrective_actions = []
+    preventive_actions = []
+    
+    if probable_cause == "Equipment Failure":
+        corrective_actions = [
+            "Replace faulty equipment",
+            "Run diagnostic tests on similar equipment",
+            "Verify redundancy failover"
+        ]
+        preventive_actions = [
+            "Schedule preventive maintenance",
+            "Implement predictive monitoring",
+            "Review equipment lifecycle"
+        ]
+    elif probable_cause == "Configuration Error":
+        corrective_actions = [
+            "Rollback configuration change",
+            "Validate configuration against baseline",
+            "Test in staging environment"
+        ]
+        preventive_actions = [
+            "Implement configuration change management",
+            "Automate configuration validation",
+            "Add peer review requirement"
+        ]
+    elif probable_cause == "Human Error":
+        corrective_actions = [
+            "Provide targeted retraining",
+            "Update standard operating procedures",
+            "Add verification checkpoints"
+        ]
+        preventive_actions = [
+            "Automate manual processes",
+            "Improve training programs",
+            "Implement error-proofing measures"
+        ]
+    elif probable_cause == "Environmental Factor":
+        corrective_actions = [
+            "Restore service via alternate path",
+            "Assess physical infrastructure damage",
+            "Deploy temporary capacity"
+        ]
+        preventive_actions = [
+            "Harden infrastructure against weather",
+            "Improve environmental monitoring",
+            "Develop contingency plans"
+        ]
+    elif probable_cause == "Vendor Issue":
+        corrective_actions = [
+            "Engage vendor for root cause",
+            "Activate vendor escalation",
+            "Implement workaround"
+        ]
+        preventive_actions = [
+            "Review vendor SLA compliance",
+            "Diversify vendor dependencies",
+            "Add vendor monitoring"
+        ]
+    else:
+        corrective_actions = [
+            "Identify root cause",
+            "Implement fix",
+            "Validate resolution"
+        ]
+        preventive_actions = [
+            "Document lessons learned",
+            "Update runbooks",
+            "Share knowledge with team"
+        ]
+    
+    return {
+        "probable_cause": probable_cause,
+        "confidence": round(confidence, 2),
+        "factors": factors,
+        "affected_services": affected_services,
+        "impacted_regions": impacted_regions,
+        "corrective_actions": corrective_actions,
+        "preventive_actions": preventive_actions,
     }
