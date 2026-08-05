@@ -505,7 +505,7 @@ def workforce_summary() -> dict[str, object]:
         ).fetchall()
     
     return {
-        "total_technicians": total_technicians,
+        "total_technicians": total_techs,
         "available": available_techs,
         "on_job": on_job_techs,
         "on_leave": on_leave_techs,

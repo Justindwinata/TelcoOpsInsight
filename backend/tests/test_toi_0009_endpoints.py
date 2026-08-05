@@ -7,7 +7,7 @@ from app.main import create_app
 def client() -> TestClient:
     app = create_app()
     with TestClient(app) as c:
-        login = c.post("/api/auth/login", json={"username": "admin", "password": "password"})
+        login = c.post("/api/auth/login", json={"username": "noc_manager", "password": "telco-demo-2026"})
         c.headers.update({"Authorization": f"Bearer {login.json()['access_token']}"})
         yield c
 
