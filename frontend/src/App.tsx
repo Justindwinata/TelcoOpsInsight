@@ -3,6 +3,13 @@ import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { FilterPanel } from "./components/FilterPanel";
 import { FilterProvider } from "./filters/FilterContext";
 import { EmptyState } from "./components/StateViews";
+import { NotificationProvider } from "./components/NotificationManager";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { OfflineDetector } from "./components/OfflineDetector";
+import { HealthChecker } from "./components/HealthChecker";
+import { CommandPalette } from "./components/CommandPalette";
+import { PerformanceMonitor } from "./components/PerformanceMonitor";
+import { SkipLink } from "./components/Accessibility";
 import { AssetManagement } from "./pages/AssetManagement";
 import { AuditLogs } from "./pages/AuditLogs";
 import { ChangeManagement } from "./pages/ChangeManagement";
@@ -34,6 +41,7 @@ import { MajorIncidents } from "./pages/MajorIncidents";
 import { MaintenanceCalendar } from "./pages/MaintenanceCalendar";
 import { ExecutiveBusinessDashboard } from "./pages/ExecutiveBusinessDashboard";
 import { ExportCenter } from "./pages/ExportCenter";
+import { SystemHealth } from "./pages/SystemHealth";
 
 const sections = [
   "NOC Command Center",
@@ -65,6 +73,7 @@ const sections = [
   "Executive Decision Center",
   "Alarm Management",
   "Major Incidents",
+  "System Health",
   "Export Center",
   "Data Upload",
   "Audit Logs",
@@ -133,6 +142,8 @@ function renderSection(section: Section) {
       return <AlarmManagement />;
     case "Major Incidents":
       return <MajorIncidents />;
+    case "System Health":
+      return <SystemHealth />;
     case "Export Center":
       return <ExportCenter />;
     case "Data Upload":
@@ -204,7 +215,7 @@ function AppContent() {
           ))}
         </nav>
       </aside>
-      <main className="content">
+      <main className="content" id="main-content">
         <header className="topbar">
           <div>
             <span className="eyebrow">Network Operations Center</span>
@@ -214,6 +225,7 @@ function AppContent() {
           <div className="user-chip">
             <span>{user.display_name}</span>
             <strong>{user.role}</strong>
+            <HealthChecker />
             <button type="button" onClick={() => void logout()}>
               Logout
             </button>
@@ -221,6 +233,8 @@ function AppContent() {
         </header>
         <FilterPanel />
         {renderSection(activeSection)}
+        <CommandPalette />
+        <PerformanceMonitor />
       </main>
     </div>
   );
@@ -228,10 +242,16 @@ function AppContent() {
 
 export function App() {
   return (
-    <AuthProvider>
-      <FilterProvider>
-        <AppContent />
-      </FilterProvider>
-    </AuthProvider>
+    <NotificationProvider>
+      <ErrorBoundary>
+        <OfflineDetector />
+        <SkipLink />
+        <AuthProvider>
+          <FilterProvider>
+            <AppContent />
+          </FilterProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </NotificationProvider>
   );
 }
