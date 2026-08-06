@@ -505,6 +505,8 @@ export type IncidentTimelineEntry = {
   start_time: string;
   resolved_time: string;
   event_count: number;
+  lifecycle_stages_present?: number;
+  lifecycle_stages: Array<Record<string, string>>;
   events: TimelineEvent[];
 };
 

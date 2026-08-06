@@ -10,7 +10,7 @@ export function AlarmManagement() {
   const summary = useApi<AlarmSummary>("/api/alarms/summary");
   const alarms = useApi<Alarm[]>("/api/alarms");
   if (summary.loading || alarms.loading) return <LoadingState label="Loading alarms" />;
-  if (summary.error || alarms.error) return <ErrorState message={summary.error ?? alarms.error} />;
+  if (summary.error || alarms.error) return <ErrorState message={summary.error || alarms.error || "Error loading alarms"} />;
   if (!summary.data || !alarms.data) return <EmptyState />;
   
   return (
