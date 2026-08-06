@@ -8,6 +8,7 @@ from app.filters import AnalyticsFilters
 from app.services.analytics_service import apply_filters, as_float, rows
 from app.services.workforce_service import workforce_summary
 from app.services.dispatch_service import dispatch_summary
+from app.services.maintenance_service import maintenance_schedule
 from app.services.sla_monitoring_service import sla_monitoring_summary
 
 
@@ -138,7 +139,7 @@ def noc_command_center(filters: AnalyticsFilters | None = None) -> dict[str, obj
                 "scheduled_start": m.get("scheduled_start"),
                 "scheduled_end": m.get("scheduled_end"),
             }
-            for m in maintenance_today[:10]
+            for m in maintenance_schedule(filters).get("upcoming_jobs", [])[:10]
         ],
         "executive_kpis": {
             "network_health": "Excellent" if network_uptime > 99.5 else "Good" if network_uptime > 99 else "Degraded",

@@ -1,16 +1,15 @@
 from __future__ import annotations
 from datetime import datetime, timedelta
 from app.database import get_connection
-from app.services.analytics_service import rows
 
 def get_maintenance_calendar(start_date: str | None = None, end_date: str | None = None) -> dict:
-    maintenance_rows = rows("maintenance_jobs")
-    change_rows = []
     try:
         with get_connection() as connection:
+            maintenance_rows = [dict(r) for r in connection.execute("SELECT * FROM field_technician_jobs WHERE status IN ('Open', 'In Progress')").fetchall()]
             change_rows = [dict(r) for r in connection.execute("SELECT * FROM change_records WHERE status IN ('Approved', 'Scheduled', 'In Progress')").fetchall()]
-    except:
-        pass
+    except Exception:
+        maintenance_rows = []
+        change_rows = []
     
     events = []
     for m in maintenance_rows:
