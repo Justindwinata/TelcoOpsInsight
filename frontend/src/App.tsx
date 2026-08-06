@@ -42,6 +42,7 @@ import { MaintenanceCalendar } from "./pages/MaintenanceCalendar";
 import { ExecutiveBusinessDashboard } from "./pages/ExecutiveBusinessDashboard";
 import { ExportCenter } from "./pages/ExportCenter";
 import { SystemHealth } from "./pages/SystemHealth";
+import { LiveEvents } from "./pages/LiveEvents";
 
 const sections = [
   "NOC Command Center",
@@ -74,6 +75,7 @@ const sections = [
   "Alarm Management",
   "Major Incidents",
   "System Health",
+  "Live Events",
   "Export Center",
   "Data Upload",
   "Audit Logs",
@@ -144,6 +146,8 @@ function renderSection(section: Section) {
       return <MajorIncidents />;
     case "System Health":
       return <SystemHealth />;
+    case "Live Events":
+      return <LiveEvents />;
     case "Export Center":
       return <ExportCenter />;
     case "Data Upload":
