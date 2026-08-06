@@ -63,7 +63,10 @@ def noc_command_center(filters: AnalyticsFilters | None = None) -> dict[str, obj
     dispatch = dispatch_summary()
     sla = sla_monitoring_summary(filters)
 
-    maintenance_rows = apply_filters(rows("maintenance_jobs"), filters) if filters else rows("maintenance_jobs")
+    try:
+        maintenance_rows = rows("field_technician_jobs")
+    except Exception:
+        maintenance_rows = []
     today = datetime.now().strftime("%Y-%m-%d")
     maintenance_today = [r for r in maintenance_rows if str(r.get("date", "")).startswith(today)]
 
