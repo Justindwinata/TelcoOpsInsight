@@ -6,6 +6,11 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sse_starlette.sse import EventSourceResponse
 
+import csv
+import io
+
+from fastapi.responses import Response
+
 from app.config import settings
 from app.services.auth_service import DemoUser, get_current_user
 from app.services.event_service import (
@@ -56,9 +61,48 @@ def events_recent(
 def events_history(
     limit: int = 200,
     event_type: str | None = None,
+    format: str = "json",
     _: DemoUser = Depends(get_current_user),
-) -> list[dict]:
-    return get_event_history(limit=limit, event_type=event_type)
+):
+    events = get_event_history(limit=limit, event_type=event_type)
+
+    if format == "json":
+        return events
+
+    if format == "csv":
+        output = io.StringIO()
+        if events:
+            writer = csv.DictWriter(output, fieldnames=list(events[0].keys()), extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(events)
+        return Response(
+            content=output.getvalue(),
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=events.csv"},
+        )
+
+    if format == "html":
+        rows = "".join(
+            f"<tr><td>{e.get('event_id')}</td><td>{e.get('timestamp')}</td>"
+            f"<td>{e.get('severity')}</td><td>{e.get('event_type')}</td>"
+            f"<td>{e.get('title')}</td><td>{e.get('region')}</td>"
+            f"<td>{e.get('acknowledged')}</td><td>{e.get('resolved')}</td></tr>"
+            for e in events
+        )
+        html = (
+            "<html><head><title>Event History</title></head><body>"
+            "<h1>Event History</h1><table border='1' cellpadding='4'><thead>"
+            "<tr><th>ID</th><th>Timestamp</th><th>Severity</th><th>Type</th>"
+            "<th>Title</th><th>Region</th><th>Acknowledged</th><th>Resolved</th>"
+            "</tr></thead><tbody>" + rows + "</tbody></table></body></html>"
+        )
+        return Response(
+            content=html,
+            media_type="text/html",
+            headers={"Content-Disposition": "attachment; filename=events.html"},
+        )
+
+    return events
 
 
 @router.post("/publish")
