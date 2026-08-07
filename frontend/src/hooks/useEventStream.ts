@@ -14,7 +14,7 @@ export type StreamEvent = {
   timestamp: string;
 };
 
-type StreamStatus = "connecting" | "connected" | "disconnected" | "paused";
+export type StreamStatus = "connecting" | "connected" | "disconnected" | "paused";
 
 export function useEventStream(enabled = true) {
   const [events, setEvents] = useState<StreamEvent[]>([]);

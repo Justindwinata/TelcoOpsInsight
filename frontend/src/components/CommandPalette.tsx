@@ -26,8 +26,6 @@ export function CommandPalette() {
     setOpen(false);
   }
 
-  const [open, setOpen] = useState(false);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {

@@ -34,7 +34,7 @@ export function LiveEvents() {
     return <LoadingState label="Loading live events" />;
   }
   if (stats.error || typeSummary.error || severitySummary.error) {
-    return <ErrorState message={stats.error ?? typeSummary.error ?? severitySummary.error} />;
+    return <ErrorState message={stats.error ?? typeSummary.error ?? severitySummary.error ?? "Failed to load events"} />;
   }
   if (!stats.data) {
     return <EmptyState />;
@@ -47,7 +47,7 @@ export function LiveEvents() {
         <KpiCard label="Acknowledged" value={integerValue(stats.data.events_acknowledged)} tone="healthy" />
         <KpiCard label="Resolved" value={integerValue(stats.data.events_resolved)} tone="healthy" />
         <KpiCard label="Event Rate" value={stats.data.events_per_second > 0 ? `${stats.data.events_per_second}/s` : "—"} tone="neutral" />
-        <KpiCard label="Connection" value={status} tone={status === "connected" ? "healthy" : status === "paused" ? "warning" : "critical"} />
+        <KpiCard label="Connection" value={String(status)} tone={status === "connected" ? "healthy" : status === "paused" ? "warning" : "critical"} />
         <KpiCard label="Event Rate (10s)" value={connectionInfo.eventRate} tone="neutral" />
       </section>
 

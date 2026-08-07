@@ -4,7 +4,7 @@ type HealthStatus = {
   backend: "ok" | "error";
   apiLatency: number;
   lastChecked: Date;
-  databaseStatus: "connected" | "error";
+  database: "connected" | "error";
 };
 
 export function HealthChecker() {
