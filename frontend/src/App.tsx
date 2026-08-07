@@ -43,9 +43,11 @@ import { ExecutiveBusinessDashboard } from "./pages/ExecutiveBusinessDashboard";
 import { ExportCenter } from "./pages/ExportCenter";
 import { SystemHealth } from "./pages/SystemHealth";
 import { LiveEvents } from "./pages/LiveEvents";
+import { RealTimeNOC } from "./pages/RealTimeNOC";
 
 const sections = [
   "NOC Command Center",
+  "Real-Time NOC",
   "Executive Overview",
   "Executive Intelligence",
   "Executive Business Dashboard",
@@ -88,6 +90,8 @@ function renderSection(section: Section) {
   switch (section) {
     case "NOC Command Center":
       return <NOCCommandCenter />;
+    case "Real-Time NOC":
+      return <RealTimeNOC />;
     case "Executive Overview":
       return <ExecutiveOverview />;
     case "Executive Intelligence":
