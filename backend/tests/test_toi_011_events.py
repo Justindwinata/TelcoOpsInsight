@@ -12,15 +12,7 @@ def client() -> TestClient:
         yield c
 
 def test_event_publish_and_retrieve(client: TestClient) -> None:
-    r = client.post("/api/events/publish", json={
-        "event_type": "link_down",
-        "severity": "Major",
-        "title": "Test link down at SITE-001",
-        "detail": "Test detail",
-        "region": "Jakarta",
-        "service_type": "Mobile",
-        "site_id": "SITE-001"
-    })
+    r = client.post("/api/events/publish?event_type=link_down&severity=Major&title=Test+link+down+at+SITE-001&detail=Test+detail&region=Jakarta&service_type=Mobile&site_id=SITE-001")
     assert r.status_code == 200
     data = r.json()
     assert "event_id" in data
